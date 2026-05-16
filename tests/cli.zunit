@@ -11,10 +11,7 @@
 @test '--version works without revolver installed' {
   local expected_version
   PATH='/usr/bin:/bin'
-  expected_version="$(
-    source "$PWD/src/zunit.zsh"
-    _zunit_version
-  )"
+  expected_version="$(zsh -fc 'source "$1" --version' zsh "$PWD/src/zunit.zsh")"
   run "$PWD/zunit" --version
 
   assert "$state" equals 0
@@ -65,6 +62,7 @@
   assert "$state" equals 0
   assert "$sandbox/.github/workflows/zunit.yml" exists
   assert "$(< "$sandbox/.github/workflows/zunit.yml")" contains 'name: "ZUnit"'
+  assert "$(< "$sandbox/.github/workflows/zunit.yml")" contains 'PATH="$PWD/.bin:$PATH" zunit --tap tests'
   assert "$(< "$sandbox/.github/workflows/zunit.yml")" contains 'zunit --tap tests'
 }
 
@@ -81,14 +79,15 @@
 }
 
 @test 'generated GitHub Actions workflow installs and runs zunit for consumer projects' {
-  local sandbox workflow
+  local sandbox workflow expected_version
   sandbox="$(mktemp -d)"
+  expected_version="$(zsh -fc 'source "$1" --version' zsh "$PWD/src/zunit.zsh")"
 
   cd "$sandbox"
   run "$OLDPWD/zunit" init --github-actions
   workflow="$(< "$sandbox/.github/workflows/zunit.yml")"
 
-  assert "$workflow" contains 'curl -fsSL '\''https://github.com/zunit-zsh/zunit/releases/download/v0.8.2/zunit'\'' > .bin/zunit'
+  assert "$workflow" contains "curl -fsSL 'https://github.com/zunit-zsh/zunit/releases/download/v${expected_version}/zunit' > .bin/zunit"
   assert "$workflow" contains 'PATH="$PWD/.bin:$PATH" zunit --tap tests'
   assert "$workflow" does_not_contain './build.zsh'
   assert "$workflow" does_not_contain './zunit --tap tests'
