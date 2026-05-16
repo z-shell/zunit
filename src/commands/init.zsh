@@ -10,9 +10,10 @@ function _zunit_init_usage() {
   echo "  zunit init [options]"
   echo
   echo "$(color yellow 'Options:')"
-  echo "  -h, --help         Output help text and exit"
-  echo "  -v, --version      Output version information and exit"
-  echo "  -t, --travis       Generate .travis.yml in project"
+  echo "  -h, --help            Output help text and exit"
+  echo "  -v, --version         Output version information and exit"
+  echo "  -g, --github-actions  Generate .github/workflows/zunit.yml in project"
+  echo "  -t, --travis          Generate legacy .travis.yml in project"
 }
 
 ###
@@ -38,9 +39,11 @@ function _zunit_parse_yaml() {
 }
 
 function _zunit_init() {
-  local with_travis
+  local with_github_actions with_travis zunit_version
 
-  zparseopts -D t=with_travis -travis=with_travis
+  zparseopts -D \
+    g=with_github_actions -github-actions=with_github_actions \
+    t=with_travis -travis=with_travis
 
   # The contents of .zunit.yml
   local yaml="tap: false
@@ -72,12 +75,42 @@ allow_risky: false"
 install:
   - mkdir .bin
   - curl -L https://github.com/zunit-zsh/zunit/releases/download/v$(_zunit_version)/zunit > .bin/zunit
-  - curl -L https://raw.githubusercontent.com/molovo/revolver/master/revolver > .bin/revolver
-  - curl -L https://raw.githubusercontent.com/molovo/color/master/color.zsh > .bin/color
+  - curl -L https://raw.githubusercontent.com/zdharma/revolver/master/revolver > .bin/revolver
+  - curl -L https://raw.githubusercontent.com/zdharma/color/master/color.zsh > .bin/color
 before_script:
   - chmod u+x .bin/{color,revolver,zunit}
   - export PATH=\"\$PWD/.bin:\$PATH\"
 script: zunit"
+
+  zunit_version="$(_zunit_version)"
+
+  local github_actions_yml="---
+name: \"ZUnit\"
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  zunit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -yq zsh
+          mkdir -p .bin
+          curl -fsSL 'https://github.com/zunit-zsh/zunit/releases/download/v${zunit_version}/zunit' > .bin/zunit
+          curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/master/revolver' > .bin/revolver
+          curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/master/color.zsh' > .bin/color
+          chmod u+x .bin/{color,revolver,zunit}
+      - name: Test
+        run: PATH=\"\$PWD/.bin:\$PATH\" zunit --tap tests"
 
   # Check that a config file doesn't already exist so that
   # we don't overwrite it
@@ -87,6 +120,16 @@ script: zunit"
     # Write the contents to the config file
     echo "Writing ZUnit config file to $PWD/.zunit.yml"
     echo "$yaml" > "$PWD/.zunit.yml"
+  fi
+
+  if [[ -n $with_github_actions ]]; then
+    if [[ -f "$PWD/.github/workflows/zunit.yml" ]]; then
+      echo $(color yellow "GitHub Actions workflow already exists at $PWD/.github/workflows/zunit.yml. Skipping...")
+    else
+      echo "Writing GitHub Actions workflow to $PWD/.github/workflows/zunit.yml"
+      mkdir -p "$PWD/.github/workflows"
+      echo "$github_actions_yml" > "$PWD/.github/workflows/zunit.yml"
+    fi
   fi
 
   # Check that the tests directory doesn't already exist so that

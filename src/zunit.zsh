@@ -42,6 +42,37 @@ function _zunit_version() {
 function _zunit() {
   local help version ctx="$1" missing_dependencies=0 missing_config=1
 
+  zparseopts -D -E \
+    h=help -help=help \
+    v=version -version=version
+
+  # Help and version output do not require runtime dependencies.
+  if [[ -n $version ]]; then
+    _zunit_version
+    exit 0
+  fi
+
+  if [[ -n $help ]]; then
+    case "$ctx" in
+      init )
+        _zunit_init_usage
+        ;;
+      run )
+        _zunit_run_usage
+        ;;
+      * )
+        _zunit_usage
+        ;;
+    esac
+    exit 0
+  fi
+
+  # Project bootstrapping does not require runtime dependencies.
+  if [[ $ctx == init ]]; then
+    _zunit_init "${(@)@:2}"
+    exit 0
+  fi
+
   if [[ -f .zunit.yml ]]; then
     # Try and parse the config file within a subprocess,
     # to avoid killing the main thread
@@ -63,53 +94,18 @@ function _zunit() {
   $(type revolver >/dev/null 2>&1)
   if [[ $? -ne 0 ]]; then
     # 'revolver' could not be found, so print an error message
-    echo "\033[0;31mMissing required dependency: Revolver - https://github.com/molovo/revolver\033[0;m" >&2
+    echo "\033[0;31mMissing required dependency: Revolver - https://github.com/zdharma/revolver\033[0;m" >&2
     exit 1
-  fi
-
-  zparseopts -D -E \
-    h=help -help=help \
-    v=version -version=version
-
-  # If the version option is passed,
-  # output version information and exit
-  if [[ -n $version ]]; then
-    _zunit_version
-    exit 0
   fi
 
   # Check which command has been passed, and run it. If the command
   # is not recognised, then we'll assume it's a test file and pass
   # it to `zunit run`, since that will catch it if it's not a valid file
   case "$ctx" in
-    init )
-      # If the help option is passed,
-      # output usage information and exit
-      if [[ -n $help ]]; then
-        _zunit_init_usage
-        exit 0
-      fi
-
-      _zunit_init "${(@)@:2}"
-      ;;
     run )
-      # If the help option is passed,
-      # output usage information and exit
-      if [[ -n $help ]]; then
-        _zunit_run_usage
-        exit 0
-      fi
-
       _zunit_run "${(@)@:2}"
       ;;
     * )
-      # If the help option is passed,
-      # output usage information and exit
-      if [[ -n $help ]]; then
-        _zunit_usage
-        exit 0
-      fi
-
       _zunit_run "$@"
       ;;
   esac

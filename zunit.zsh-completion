@@ -24,7 +24,7 @@ _zunit() {
     '--verbose[prints full output from each test]' \
     '--output-text[print results to a text log, in TAP compatible format]' \
     '--output-html[print results to a HTML page]' \
-    '--allow-risky[supress warnings generated for risky tests]' \
+    '--allow-risky[suppress warnings generated for risky tests]' \
     '--time-limit[set a time limit in seconds for each test]'
 
   case "$state" in
@@ -33,6 +33,7 @@ _zunit() {
         init )
           _arguments -A \
             '(-h --help)'{-h,--help}'[show help text and exit]' \
+            '(-g --github-actions)'{-g,--github-actions}'[generate a GitHub Actions workflow]' \
             '(-t --travis)'{-t,--travis}'[generate a .travis.yml file]'
 
           _arguments \
@@ -46,7 +47,7 @@ _zunit() {
             '--verbose[prints full output from each test]' \
             '--output-text[print results to a text log, in TAP compatible format]' \
             '--output-html[print results to a HTML page]' \
-            '--allow-risky[supress warnings generated for risky tests]' \
+            '--allow-risky[suppress warnings generated for risky tests]' \
             '--time-limit[set a time limit in seconds for each test]'
 
           _arguments \

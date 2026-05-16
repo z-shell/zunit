@@ -1,0 +1,9 @@
+#!/usr/bin/env zunit
+
+@test 'HTML reports link to the maintained repository' {
+  local template
+  template="$(< "$PWD/src/reports/html.zsh")"
+
+  assert "$template" contains 'https://github.com/z-shell/zunit'
+  assert "$template" does_not_contain 'https://github.com/zunit-zsh/zunit'
+}

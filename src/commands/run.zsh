@@ -475,7 +475,7 @@ function _zunit_run() {
     # Make sure we have a config file, otherwise we can't determine
     # which directory to write logs to
     if [[ $missing_config -eq 1 ]]; then
-      echo $(color red '.zunit.yml could not be found. Run `zulu init`')
+      echo $(color red '.zunit.yml could not be found. Run `zunit init`')
       exit 1
     fi
 

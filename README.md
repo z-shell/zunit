@@ -1,90 +1,73 @@
-![ZUnit](https://zunit.xyz/img/logo.png)
+# ZUnit
 
-[![GitHub release](https://img.shields.io/github/release/zunit-zsh/zunit.svg)](https://github.com/zunit-zsh/zunit/releases/latest) [![Build Status](https://travis-ci.org/zunit-zsh/zunit.svg?branch=master)](https://travis-ci.org/zunit-zsh/zunit) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zunit-zsh/zunit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+ZUnit is a unit testing framework for Zsh projects.
 
-ZUnit is a powerful unit testing framework for ZSH
+This repository is maintained by the [Z-Shell organization](https://github.com/z-shell)
+for the wider Zi/Z-Shell ecosystem.
 
 ## Installation
 
-> **WARNING**: Although the majority of ZUnit's functionality works as expected, it is in the early stages of development, and as such bugs are likely to be present. Please continue with caution, and [report any issues](https://github.com/zunit-zsh/zunit/issues/new) you may have.
-
-### [Zulu](https://github.com/zulu-zsh/zulu)
+### Manual install
 
 ```sh
-zulu install zunit
-```
-
-> **NOTE:** In versions of Zulu prior to `1.2.0`, there is an additional step required after install:
-
-  ```sh
-  cd ~/.zulu/packages/zunit
-  ./build.zsh
-  zulu link zunit
-  ```
-  
-### [zplug](https://github.com/zplug/zplug)
-
-ZUnit and its dependencies can all be installed with zplug.
-
-```sh
-zplug 'molovo/revolver', \
-  as:command, \
-  use:revolver
-zplug 'zunit-zsh/zunit', \
-  as:command, \
-  use:zunit, \
-  hook-build:'./build.zsh'
-```
-
-
-### Homebrew
-
-```sh
-brew install zunit-zsh/zunit/zunit
-```
-
-### Manual
-
-```sh
-git clone https://github.com/zunit-zsh/zunit
-cd ./zunit
+git clone https://github.com/z-shell/zunit.git
+cd zunit
 ./build.zsh
 chmod u+x ./zunit
 cp ./zunit /usr/local/bin
 ```
 
-> ZUnit requires [Revolver](https://github.com/molovo/revolver) to be installed, and in your `$PATH`. The zulu or homebrew installation methods will install this dependency for you.
+ZUnit requires [Revolver](https://github.com/zdharma/revolver) to be installed
+and available in your `$PATH`.
 
-## Writing Tests
+### Legacy package-manager recipes
 
-### Test syntax
+Older package-manager recipes may still reference historical project
+coordinates such as `zunit-zsh/zunit` or `zdharma/zunit`. They are not the
+canonical source for this repository, so prefer the manual install path above
+unless you have verified that a specific integration is still maintained.
 
-Tests in ZUnit have a simple syntax, which is inspired by the [BATS](https://github.com/sstephenson/bats) framework.
+## Writing tests
 
-```sh
+Tests use a concise syntax inspired by [Bats](https://github.com/bats-core/bats-core):
+
+```zsh
 #!/usr/bin/env zunit
 
-@test 'My first test' {
-	# Test contents here
+@test 'my first test' {
+  # Test contents here
 }
 ```
 
-The body of each test can contain any valid ZSH code. The zunit shebang `#!/usr/bin/env zunit` **MUST** appear at the top of each test file, or ZUnit will not run it.
+Each test file must start with the `#!/usr/bin/env zunit` shebang. The body of a
+test may contain any valid Zsh code.
+
+## Running tests
+
+Run the full suite from the project root:
+
+```sh
+zunit
+```
+
+You can also pass a test file, a directory, or a glob:
+
+```sh
+zunit tests/example.zunit
+zunit tests
+zunit 'tests/**/*.zunit'
+```
 
 ## Documentation
 
-For a full breakdown of ZUnit's syntax and functionality, check out the [official documentation](https://zunit.xyz/docs/).
+Full documentation is available in the [Z-Shell wiki](https://wiki.zshell.dev/community/zunit).
 
 ## Contributing
 
-All contributions are welcome, and encouraged. Please read our [contribution guidelines](contributing.md) and [code of conduct](code-of-conduct.md) for more information.
+Contributions are welcome. See [contributing.md](contributing.md) and
+[code-of-conduct.md](code-of-conduct.md) before opening an issue or pull
+request.
 
 ## License
 
-Copyright (c) 2016 James Dinsdale <hi@molovo.co> (molovo.co)
-
-ZUnit is licensed under The MIT License (MIT)
-
-## Team
-
-* [James Dinsdale](http://molovo.co)
+ZUnit is licensed under the MIT License. See [LICENSE](LICENSE).
