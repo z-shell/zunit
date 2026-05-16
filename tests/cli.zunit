@@ -9,11 +9,16 @@
 }
 
 @test '--version works without revolver installed' {
+  local expected_version
   PATH='/usr/bin:/bin'
+  expected_version="$(
+    source "$PWD/src/zunit.zsh"
+    _zunit_version
+  )"
   run "$PWD/zunit" --version
 
   assert "$state" equals 0
-  assert "$output" same_as '0.8.2'
+  assert "$output" same_as "$expected_version"
 }
 
 @test 'help text spells suppress correctly' {
