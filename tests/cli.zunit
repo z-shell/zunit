@@ -60,5 +60,31 @@
   assert "$state" equals 0
   assert "$sandbox/.github/workflows/zunit.yml" exists
   assert "$(< "$sandbox/.github/workflows/zunit.yml")" contains 'name: "ZUnit"'
-  assert "$(< "$sandbox/.github/workflows/zunit.yml")" contains './zunit --tap tests'
+  assert "$(< "$sandbox/.github/workflows/zunit.yml")" contains 'zunit --tap tests'
+}
+
+@test 'init works without revolver installed' {
+  local sandbox
+  sandbox="$(mktemp -d)"
+
+  cd "$sandbox"
+  PATH='/usr/bin:/bin'
+  run "$OLDPWD/zunit" init
+
+  assert "$state" equals 0
+  assert "$sandbox/.zunit.yml" exists
+}
+
+@test 'generated GitHub Actions workflow installs and runs zunit for consumer projects' {
+  local sandbox workflow
+  sandbox="$(mktemp -d)"
+
+  cd "$sandbox"
+  run "$OLDPWD/zunit" init --github-actions
+  workflow="$(< "$sandbox/.github/workflows/zunit.yml")"
+
+  assert "$workflow" contains 'curl -fsSL '\''https://github.com/zunit-zsh/zunit/releases/download/v0.8.2/zunit'\'' > .bin/zunit'
+  assert "$workflow" contains 'PATH="$PWD/.bin:$PATH" zunit --tap tests'
+  assert "$workflow" does_not_contain './build.zsh'
+  assert "$workflow" does_not_contain './zunit --tap tests'
 }

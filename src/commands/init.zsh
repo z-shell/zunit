@@ -41,7 +41,7 @@ function _zunit_parse_yaml() {
 }
 
 function _zunit_init() {
-  local with_github_actions with_travis
+  local with_github_actions with_travis zunit_version
 
   zparseopts -D \
     g=with_github_actions -github-actions=with_github_actions \
@@ -84,9 +84,11 @@ before_script:
   - export PATH=\"\$PWD/.bin:\$PATH\"
 script: zunit"
 
+  zunit_version="$(_zunit_version)"
+
   # An example GitHub Actions workflow
-  local github_actions_yml='---
-name: "ZUnit"
+  local github_actions_yml="---
+name: \"ZUnit\"
 
 on:
   push:
@@ -106,13 +108,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -yq zsh
           mkdir -p .bin
-          curl -fsSL '\''https://raw.githubusercontent.com/zdharma/revolver/master/revolver'\'' > .bin/revolver
-          curl -fsSL '\''https://raw.githubusercontent.com/zdharma/color/master/color.zsh'\'' > .bin/color
-          chmod u+x .bin/{color,revolver}
-      - name: Build
-        run: ./build.zsh
+          curl -fsSL 'https://github.com/zunit-zsh/zunit/releases/download/v${zunit_version}/zunit' > .bin/zunit
+          curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/master/revolver' > .bin/revolver
+          curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/master/color.zsh' > .bin/color
+          chmod u+x .bin/{color,revolver,zunit}
       - name: Test
-        run: PATH="$PWD/.bin:$PATH" ./zunit --tap tests'
+        run: PATH=\"\$PWD/.bin:\$PATH\" zunit --tap tests"
 
   # Check that a config file doesn't already exist so that
   # we don't overwrite it

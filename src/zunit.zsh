@@ -73,9 +73,9 @@ function _zunit() {
   fi
 
   # Check for the 'revolver' dependency only when a command may actually run
-  # tests. Introspection commands such as --help and --version should remain
-  # usable before dependencies are installed.
-  if [[ -z $help ]]; then
+  # tests. Introspection and bootstrap commands should remain usable before
+  # dependencies are installed.
+  if [[ -z $help && $ctx != init ]]; then
     if ! type revolver >/dev/null 2>&1; then
       echo "\033[0;31mMissing required dependency: Revolver - https://github.com/zdharma/revolver\033[0;m" >&2
       exit 1
