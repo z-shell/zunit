@@ -1,4 +1,6 @@
 #!/usr/bin/env zsh
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
 
 setopt extendedglob typesetsilent
 
@@ -25,7 +27,7 @@ function _zunit_usage() {
   echo "      --verbose      Prints full output from each test"
   echo "      --output-text  Print results to a text log, in TAP compatible format"
   echo "      --output-html  Print results to a HTML page"
-  echo "      --allow-risky  Supress warnings generated for risky tests"
+  echo "      --allow-risky  Suppress warnings generated for risky tests"
   echo "      --time-limit   Set a time limit in seconds for each test"
 }
 
@@ -59,14 +61,6 @@ function _zunit() {
     fi
   fi
 
-  # Check for the 'revolver' dependency
-  $(type revolver >/dev/null 2>&1)
-  if [[ $? -ne 0 ]]; then
-    # 'revolver' could not be found, so print an error message
-    echo "\033[0;31mMissing required dependency: Revolver - https://github.com/molovo/revolver\033[0;m" >&2
-    exit 1
-  fi
-
   zparseopts -D -E \
     h=help -help=help \
     v=version -version=version
@@ -76,6 +70,16 @@ function _zunit() {
   if [[ -n $version ]]; then
     _zunit_version
     exit 0
+  fi
+
+  # Check for the 'revolver' dependency only when a command may actually run
+  # tests. Introspection commands such as --help and --version should remain
+  # usable before dependencies are installed.
+  if [[ -z $help ]]; then
+    if ! type revolver >/dev/null 2>&1; then
+      echo "\033[0;31mMissing required dependency: Revolver - https://github.com/zdharma/revolver\033[0;m" >&2
+      exit 1
+    fi
   fi
 
   # Check which command has been passed, and run it. If the command

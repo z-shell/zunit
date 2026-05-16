@@ -1,8 +1,21 @@
 ![ZUnit](https://zunit.xyz/img/logo.png)
 
-[![GitHub release](https://img.shields.io/github/release/zunit-zsh/zunit.svg)](https://github.com/zunit-zsh/zunit/releases/latest) [![Build Status](https://travis-ci.org/zunit-zsh/zunit.svg?branch=master)](https://travis-ci.org/zunit-zsh/zunit) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zunit-zsh/zunit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![GitHub release](https://img.shields.io/github/release/zunit-zsh/zunit.svg)](https://github.com/zunit-zsh/zunit/releases/latest) [![ZUnit (native)](https://github.com/z-shell/zunit/actions/workflows/test-native.yml/badge.svg)](https://github.com/z-shell/zunit/actions/workflows/test-native.yml) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zunit-zsh/zunit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-ZUnit is a powerful unit testing framework for ZSH
+ZUnit is a powerful unit testing framework for ZSH.
+
+This repository is maintained by the Z-Shell organization as the active
+workspace mirror used by the wider Zi/Z-Shell ecosystem. Historical upstream
+links are preserved where they still describe the original project, while
+runtime integrations continue to follow the currently published package
+coordinates used across the ecosystem.
+
+## Maintenance
+
+The Z-Shell mirror validates the project with GitHub Actions using native tests,
+Zsh syntax checks, and a scheduled Zsh compatibility matrix. The matrix follows
+the versions used by the surrounding Z-Shell test infrastructure so downstream
+projects can rely on the same compatibility baseline.
 
 ## Installation
 
@@ -27,10 +40,10 @@ zulu install zunit
 ZUnit and its dependencies can all be installed with zplug.
 
 ```sh
-zplug 'molovo/revolver', \
+zplug 'zdharma/revolver', \
   as:command, \
   use:revolver
-zplug 'zunit-zsh/zunit', \
+zplug 'zdharma/zunit', \
   as:command, \
   use:zunit, \
   hook-build:'./build.zsh'
@@ -46,14 +59,14 @@ brew install zunit-zsh/zunit/zunit
 ### Manual
 
 ```sh
-git clone https://github.com/zunit-zsh/zunit
+git clone https://github.com/zdharma/zunit
 cd ./zunit
 ./build.zsh
 chmod u+x ./zunit
 cp ./zunit /usr/local/bin
 ```
 
-> ZUnit requires [Revolver](https://github.com/molovo/revolver) to be installed, and in your `$PATH`. The zulu or homebrew installation methods will install this dependency for you.
+> ZUnit requires [Revolver](https://github.com/zdharma/revolver) to be installed, and in your `$PATH`. The zulu or homebrew installation methods will install this dependency for you.
 
 ## Writing Tests
 
@@ -70,6 +83,12 @@ Tests in ZUnit have a simple syntax, which is inspired by the [BATS](https://git
 ```
 
 The body of each test can contain any valid ZSH code. The zunit shebang `#!/usr/bin/env zunit` **MUST** appear at the top of each test file, or ZUnit will not run it.
+
+To bootstrap a new project with a current CI example, run:
+
+```sh
+zunit init --github-actions
+```
 
 ## Documentation
 

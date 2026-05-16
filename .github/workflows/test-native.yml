@@ -1,0 +1,32 @@
+---
+name: "ZUnit (native)"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 12 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  zunit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -yq zsh
+          mkdir -p .bin
+          curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/master/revolver' > .bin/revolver
+          curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/master/color.zsh' > .bin/color
+          chmod u+x .bin/{color,revolver}
+      - name: Build
+        run: ./build.zsh
+      - name: Run test suite
+        run: PATH="$PWD/.bin:$PATH" ./zunit --tap tests
