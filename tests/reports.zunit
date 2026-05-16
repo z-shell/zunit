@@ -1,0 +1,13 @@
+#!/usr/bin/env zunit
+
+@test 'HTML reports escape test names and failure messages' {
+  source "$PWD/src/reports/html.zsh"
+
+  name='<script>alert("name")</script>'
+  message='<b>boom & burn</b>'
+
+  output="$(_zunit_html_failure)"
+
+  assert "$output" contains '&lt;script&gt;alert(&quot;name&quot;)&lt;/script&gt;'
+  assert "$output" contains '&lt;b&gt;boom &amp; burn&lt;/b&gt;'
+}

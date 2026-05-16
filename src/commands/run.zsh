@@ -1,3 +1,5 @@
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
 ###########################
 # The 'zunit run' command #
 ###########################
@@ -17,7 +19,7 @@ function _zunit_run_usage() {
   echo "      --verbose          Prints full output from each test"
   echo "      --output-text      Print results to a text log, in TAP compatible format"
   echo "      --output-html      Print results to a HTML page"
-  echo "      --allow-risky      Supress warnings generated for risky tests"
+  echo "      --allow-risky      Suppress warnings generated for risky tests"
   echo "      --time-limit <n>   Set a time limit of n seconds for each test"
 }
 
@@ -475,7 +477,7 @@ function _zunit_run() {
     # Make sure we have a config file, otherwise we can't determine
     # which directory to write logs to
     if [[ $missing_config -eq 1 ]]; then
-      echo $(color red '.zunit.yml could not be found. Run `zulu init`')
+      echo $(color red '.zunit.yml could not be found. Run `zunit init`')
       exit 1
     fi
 

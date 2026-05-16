@@ -1,0 +1,94 @@
+#!/usr/bin/env zunit
+
+@test '--help works without revolver installed' {
+  PATH='/usr/bin:/bin'
+  run "$PWD/zunit" --help
+
+  assert "$state" equals 0
+  assert "$output" contains 'Usage:'
+}
+
+@test '--version works without revolver installed' {
+  local expected_version
+  PATH='/usr/bin:/bin'
+  expected_version="$(zsh -fc 'source "$1" --version' zsh "$PWD/src/zunit.zsh")"
+  run "$PWD/zunit" --version
+
+  assert "$state" equals 0
+  assert "$output" same_as "$expected_version"
+}
+
+@test 'help text spells suppress correctly' {
+  PATH='/usr/bin:/bin'
+  run "$PWD/zunit" --help
+
+  assert "$output" contains 'Suppress warnings generated for risky tests'
+}
+
+@test 'run reports the active revolver repository when dependency is missing' {
+  PATH='/usr/bin:/bin'
+  run "$PWD/zunit" run
+
+  assert "$state" equals 1
+  assert "$output" contains 'https://github.com/zdharma/revolver'
+}
+
+@test 'report output without config points users to zunit init' {
+  local sandbox
+  sandbox="$(mktemp -d)"
+
+  cd "$sandbox"
+  run "$OLDPWD/zunit" --output-text
+
+  assert "$state" equals 1
+  assert "$output" contains '.zunit.yml could not be found. Run `zunit init`'
+}
+
+@test 'init help documents GitHub Actions bootstrap support' {
+  PATH='/usr/bin:/bin'
+  run "$PWD/zunit" init --help
+
+  assert "$state" equals 0
+  assert "$output" contains '--github-actions'
+}
+
+@test 'init can generate GitHub Actions workflow' {
+  local sandbox
+  sandbox="$(mktemp -d)"
+
+  cd "$sandbox"
+  run "$OLDPWD/zunit" init --github-actions
+
+  assert "$state" equals 0
+  assert "$sandbox/.github/workflows/zunit.yml" exists
+  assert "$(< "$sandbox/.github/workflows/zunit.yml")" contains 'name: "ZUnit"'
+  assert "$(< "$sandbox/.github/workflows/zunit.yml")" contains 'PATH="$PWD/.bin:$PATH" zunit --tap tests'
+  assert "$(< "$sandbox/.github/workflows/zunit.yml")" contains 'zunit --tap tests'
+}
+
+@test 'init works without revolver installed' {
+  local sandbox
+  sandbox="$(mktemp -d)"
+
+  cd "$sandbox"
+  PATH='/usr/bin:/bin'
+  run "$OLDPWD/zunit" init
+
+  assert "$state" equals 0
+  assert "$sandbox/.zunit.yml" exists
+}
+
+@test 'generated GitHub Actions workflow installs and runs zunit for consumer projects' {
+  local sandbox workflow expected_version
+  sandbox="$(mktemp -d)"
+  expected_version="$(zsh -fc 'source "$1" --version' zsh "$PWD/src/zunit.zsh")"
+
+  cd "$sandbox"
+  run "$OLDPWD/zunit" init --github-actions
+  workflow="$(< "$sandbox/.github/workflows/zunit.yml")"
+
+  assert "$workflow" contains "curl -fsSL 'https://github.com/zunit-zsh/zunit/releases/download/v${expected_version}/zunit' > .bin/zunit"
+  assert "$workflow" contains 'PATH="$PWD/.bin:$PATH" zunit --tap tests'
+  assert "$workflow" does_not_contain './build.zsh'
+  assert "$workflow" does_not_contain './zunit --tap tests'
+}

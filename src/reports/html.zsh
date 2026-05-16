@@ -1,6 +1,21 @@
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
 #########################################
 # Functions for handling HTML reporting #
 #########################################
+
+###
+# Escape text before inserting it into generated HTML
+###
+function _zunit_html_escape() {
+  local value="$1"
+  value="${value//&/&amp;}"
+  value="${value//</&lt;}"
+  value="${value//>/&gt;}"
+  value="${value//\"/&quot;}"
+  value="${value//\'/&#39;}"
+  print -r -- "$value"
+}
 
 ###
 # The head of the HTML document used to display results
@@ -22,8 +37,9 @@ function _zunit_html_footer() {
 # Output a HTML success message
 ###
 _zunit_html_success() {
+  local safe_name="$(_zunit_html_escape "$name")"
   echo "<li class='results--item passed visible'>
-    <h6>$name</h6>
+    <h6>$safe_name</h6>
   </li>"
 }
 
@@ -31,9 +47,11 @@ _zunit_html_success() {
 # Output a HTML failure message
 ###
 _zunit_html_failure() {
+  local safe_name="$(_zunit_html_escape "$name")"
+  local safe_message="$(_zunit_html_escape "$message")"
   echo "<li class='results--item failed visible'>
-    <h6>$name</h6>
-    <pre><code>$message</code></pre>
+    <h6>$safe_name</h6>
+    <pre><code>$safe_message</code></pre>
   </li>"
 }
 
@@ -41,9 +59,11 @@ _zunit_html_failure() {
 # Output a HTML error message
 ###
 _zunit_html_error() {
+  local safe_name="$(_zunit_html_escape "$name")"
+  local safe_message="$(_zunit_html_escape "$message")"
   echo "<li class='results--item error visible'>
-    <h6>$name</h6>
-    <pre><code>$message</code></pre>
+    <h6>$safe_name</h6>
+    <pre><code>$safe_message</code></pre>
   </li>"
 }
 
@@ -51,9 +71,11 @@ _zunit_html_error() {
 # Output a HTML warning message
 ###
 _zunit_html_warn() {
+  local safe_name="$(_zunit_html_escape "$name")"
+  local safe_message="$(_zunit_html_escape "$message")"
   echo "<li class='results--item warning visible'>
-    <h6>$name</h6>
-    <span class='results--item_warning'>$message</span>
+    <h6>$safe_name</h6>
+    <span class='results--item_warning'>$safe_message</span>
   </li>"
 }
 
@@ -61,9 +83,11 @@ _zunit_html_warn() {
 # Output a HTML skipped test message
 ###
 _zunit_html_skip() {
+  local safe_name="$(_zunit_html_escape "$name")"
+  local safe_message="$(_zunit_html_escape "$message")"
   echo "<li class='results--item skipped visible'>
-    <h6>$name</h6>
-    <span class='results--item_skip-reason'>$message</span>
+    <h6>$safe_name</h6>
+    <span class='results--item_skip-reason'>$safe_message</span>
   </li>"
 }
 
@@ -72,7 +96,8 @@ _zunit_html_skip() {
 ###
 _zunit_html_fatal_error() {
   message="$@"
+  local safe_message="$(_zunit_html_escape "$message")"
   echo "<li class='results--item error fatal visible'>
-    <h6>$message</h6>
+    <h6>$safe_message</h6>
   </li>"
 }
