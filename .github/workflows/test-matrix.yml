@@ -22,10 +22,10 @@ jobs:
       - name: Build test image
         run: |
           cat > Dockerfile.ci <<'EOF'
-          FROM alpine:edge
+          FROM alpine:3.20
           ARG ZSH_VERSION
           RUN apk add --no-cache autoconf gcc make musl-dev ncurses-dev curl git xz yodl
-          RUN curl -fsSL "https://sourceforge.net/projects/zsh/files/zsh/${ZSH_VERSION}/zsh-${ZSH_VERSION}.tar.xz/download" -o /tmp/zsh.tar.xz \
+          RUN curl -fsSL --retry 3 --retry-delay 5 "https://sourceforge.net/projects/zsh/files/zsh/${ZSH_VERSION}/zsh-${ZSH_VERSION}.tar.xz/download" -o /tmp/zsh.tar.xz \
             && tar -C /tmp -xf /tmp/zsh.tar.xz \
             && cd "/tmp/zsh-${ZSH_VERSION}" \
             && ./configure --prefix=/usr/local \

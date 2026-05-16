@@ -10,6 +10,13 @@ links are preserved where they still describe the original project, while
 runtime integrations continue to follow the currently published package
 coordinates used across the ecosystem.
 
+> **Note:** The install snippets below intentionally reference `zdharma/zunit`
+> and `zdharma/revolver` — those are the package coordinates that zplug,
+> Homebrew, and related tooling still resolve at runtime. The `z-shell/zunit`
+> repository (where this README and the CI badges live) is the active
+> development mirror; the `zdharma/*` names are preserved to avoid breaking
+> existing user configurations.
+
 ## Maintenance
 
 The Z-Shell mirror validates the project with GitHub Actions using native tests,

@@ -14,7 +14,7 @@ function _zunit_html_escape() {
   value="${value//>/&gt;}"
   value="${value//\"/&quot;}"
   value="${value//\'/&#39;}"
-  echo "$value"
+  print -r -- "$value"
 }
 
 ###
