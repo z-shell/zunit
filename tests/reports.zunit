@@ -1,7 +1,6 @@
 #!/usr/bin/env zunit
 
 @test 'HTML reports escape test names and failure messages' {
-  source "$PWD/src/commands/run.zsh"
   source "$PWD/src/reports/html.zsh"
 
   name='<script>alert("name")</script>'
