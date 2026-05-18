@@ -34,10 +34,19 @@
 }
 
 @test 'report output without config points users to zunit init' {
-  local sandbox
+  local sandbox stubbin
   sandbox="$(mktemp -d)"
+  stubbin="$sandbox/.bin"
+
+  mkdir -p "$stubbin"
+  print -r -- '#!/usr/bin/env zsh' > "$stubbin/revolver"
+  print -r -- 'exit 0' >> "$stubbin/revolver"
+  print -r -- '#!/usr/bin/env zsh' > "$stubbin/color"
+  print -r -- 'print -r -- "${@: -1}"' >> "$stubbin/color"
+  chmod u+x "$stubbin/revolver" "$stubbin/color"
 
   cd "$sandbox"
+  PATH="$stubbin:/usr/bin:/bin"
   run "$OLDPWD/zunit" --output-text
 
   assert "$state" equals 1
@@ -50,6 +59,7 @@
 
   assert "$state" equals 0
   assert "$output" contains '--github-actions'
+  assert "$output" does_not_contain '--version'
 }
 
 @test 'init can generate GitHub Actions workflow' {

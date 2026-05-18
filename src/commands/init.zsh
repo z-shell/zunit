@@ -13,7 +13,6 @@ function _zunit_init_usage() {
   echo
   echo "$(color yellow 'Options:')"
   echo "  -h, --help            Output help text and exit"
-  echo "  -v, --version         Output version information and exit"
   echo "  -g, --github-actions  Generate .github/workflows/zunit.yml in project"
   echo "  -t, --travis          Generate legacy .travis.yml in project"
 }
