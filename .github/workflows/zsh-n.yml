@@ -20,7 +20,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -yq zsh
       - name: Check Zsh syntax
         run: |
-          find src -type f -name '*.zsh' -print | sort | while read -r file; do
+          find src scripts -type f -name '*.zsh' -print | sort | while read -r file; do
             zsh -n "$file"
           done
           zsh -n build.zsh
