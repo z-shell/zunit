@@ -36,12 +36,12 @@ zulu install zunit
 
 > **NOTE:** In versions of Zulu prior to `1.2.0`, there is an additional step required after install:
 
-  ```sh
-  cd ~/.zulu/packages/zunit
-  ./build.zsh
-  zulu link zunit
-  ```
-  
+```sh
+cd ~/.zulu/packages/zunit
+./build.zsh
+zulu link zunit
+```
+
 ### [zplug](https://github.com/zplug/zplug)
 
 ZUnit and its dependencies can all be installed with zplug.
@@ -55,7 +55,6 @@ zplug 'zdharma/zunit', \
   use:zunit, \
   hook-build:'./build.zsh'
 ```
-
 
 ### Homebrew
 
@@ -113,4 +112,4 @@ ZUnit is licensed under The MIT License (MIT)
 
 ## Team
 
-* [James Dinsdale](http://molovo.co)
+- [James Dinsdale](http://molovo.co)
