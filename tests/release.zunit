@@ -1,0 +1,51 @@
+#!/usr/bin/env zunit
+
+@test 'release tag guard accepts a matching semantic version tag' {
+  local sandbox binary
+  sandbox="$(mktemp -d)"
+  binary="$sandbox/zunit"
+
+  print -r -- '#!/usr/bin/env zsh' > "$binary"
+  print -r -- '[[ $1 == --version ]] && print -r -- 1.2.3' >> "$binary"
+  chmod u+x "$binary"
+
+  run "$PWD/scripts/verify-release-tag.zsh" v1.2.3 "$binary"
+
+  assert "$state" equals 0
+  assert "$output" contains 'Release tag v1.2.3 matches zunit version 1.2.3'
+}
+
+@test 'release tag guard rejects a mismatched binary version' {
+  local sandbox binary
+  sandbox="$(mktemp -d)"
+  binary="$sandbox/zunit"
+
+  print -r -- '#!/usr/bin/env zsh' > "$binary"
+  print -r -- '[[ $1 == --version ]] && print -r -- 1.2.4' >> "$binary"
+  chmod u+x "$binary"
+
+  run "$PWD/scripts/verify-release-tag.zsh" v1.2.3 "$binary"
+
+  assert "$state" equals 1
+  assert "$output" contains 'Release tag v1.2.3 does not match zunit version 1.2.4'
+}
+
+@test 'release tag guard rejects non-semantic tags' {
+  run "$PWD/scripts/verify-release-tag.zsh" latest ./zunit
+
+  assert "$state" equals 1
+  assert "$output" contains 'Expected semantic version tag like v1.2.3'
+}
+
+@test 'release workflow publishes the zunit binary only for semantic tags' {
+  local workflow
+  workflow="$(< "$PWD/.github/workflows/release.yml")"
+
+  assert "$workflow" contains 'tags: ["v*.*.*"]'
+  assert "$workflow" does_not_contain 'branches: [main]'
+  assert "$workflow" contains 'contents: write'
+  assert "$workflow" contains 'actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5'
+  assert "$workflow" contains 'scripts/verify-release-tag.zsh "$tag" ./zunit'
+  assert "$workflow" contains 'gh release create "$tag" ./zunit#zunit'
+  assert "$workflow" contains 'gh release upload "$tag" ./zunit#zunit --clobber'
+}
