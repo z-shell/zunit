@@ -1,0 +1,9 @@
+# Trunk local state
+actions
+logs
+notifications
+out
+plugins
+tmp
+tools
+user.yaml
