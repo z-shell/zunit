@@ -5,6 +5,8 @@ ignore: |
   .travis.yml
 
 rules:
+  comments:
+    min-spaces-from-content: 1
   document-start: disable
   line-length: disable
   truthy:
