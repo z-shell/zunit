@@ -32,8 +32,8 @@ jobs:
             && make \
             && make install
           RUN mkdir -p /opt/zunit/.bin \
-            && curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/master/revolver' > /opt/zunit/.bin/revolver \
-            && curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/master/color.zsh' > /opt/zunit/.bin/color \
+            && curl -fsSL 'https://raw.githubusercontent.com/z-shell/revolver/master/revolver' > /opt/zunit/.bin/revolver \
+            && curl -fsSL 'https://raw.githubusercontent.com/z-shell/color/master/color.zsh' > /opt/zunit/.bin/color \
             && chmod u+x /opt/zunit/.bin/{color,revolver}
           WORKDIR /opt/zunit
           EOF

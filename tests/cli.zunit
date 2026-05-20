@@ -30,7 +30,7 @@
   run "$PWD/zunit" run
 
   assert "$state" equals 1
-  assert "$output" contains 'https://github.com/zdharma/revolver'
+  assert "$output" contains 'https://github.com/z-shell/revolver'
 }
 
 @test 'report output without config points users to zunit init' {
