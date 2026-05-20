@@ -77,7 +77,7 @@ function _zunit() {
   # dependencies are installed.
   if [[ -z $help && $ctx != init ]]; then
     if ! type revolver >/dev/null 2>&1; then
-      echo "\033[0;31mMissing required dependency: Revolver - https://github.com/zdharma/revolver\033[0;m" >&2
+      echo "\033[0;31mMissing required dependency: Revolver - https://github.com/z-shell/revolver\033[0;m" >&2
       exit 1
     fi
   fi

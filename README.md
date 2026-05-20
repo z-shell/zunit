@@ -22,7 +22,7 @@ coordinates used across the ecosystem.
 
 > **Note:** The `z-shell/zunit` repository is the active development mirror;
 > runtime package coordinates (e.g. for Homebrew or zplug) may still reference
-> `zdharma/zunit` to avoid breaking existing user configurations.
+> `z-shell/zunit` to avoid breaking existing user configurations.
 
 ## Maintenance
 
