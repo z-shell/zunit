@@ -13,7 +13,7 @@ setopt EXTENDED_GLOB
 
 # Print each of the source files into the target, removing any comments
 # and blank lines from the compiled executable
-cat src/**/(^zunit).zsh | grep -v -E '^(\s*#.*[^"]|\s*)$' >> zunit
+cat lib/*.zsh src/**/(^zunit).zsh | grep -v -E '^(\s*#.*[^"]|\s*)$' >> zunit
 
 # Print the main command last
 cat src/zunit.zsh | grep -v -E '^(\s*#.*[^"]|\s*)$' >> zunit
