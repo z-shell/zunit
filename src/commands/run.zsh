@@ -8,10 +8,10 @@
 # Output usage information and exit
 ###
 function _zunit_run_usage() {
-  echo "$(color yellow 'Usage:')"
+  echo "($(_zunit_color yellow 'Usage:')"
   echo "  zunit run [options] [tests...]"
   echo
-  echo "$(color yellow 'Options:')"
+  echo "($(_zunit_color yellow 'Options:')"
   echo "  -h, --help             Output help text and exit"
   echo "  -v, --version          Output version information and exit"
   echo "  -f, --fail-fast        Stop the test runner immediately after the first failure"
@@ -49,12 +49,12 @@ function _zunit_output_results() {
   echo
   echo "$total tests run in $(_zunit_human_time $elapsed)"
   echo
-  echo "$(color yellow underline 'Results')                        "
-  echo "$(color green '✔') Passed      $passed                    "
-  echo "$(color red '✘') Failed      $failed                      "
-  echo "$(color red '‼') Errors      $errors                      "
-  echo "$(color magenta '●') Skipped     $skipped                 "
-  echo "$(color yellow '‼') Warnings    $warnings                 "
+  echo "($(_zunit_color yellow underline 'Results')                        "
+  echo "($(_zunit_color green '✔') Passed      $passed                    "
+  echo "($(_zunit_color red '✘') Failed      $failed                      "
+  echo "($(_zunit_color red '‼') Errors      $errors                      "
+  echo "($(_zunit_color magenta '●') Skipped     $skipped                 "
+  echo "($(_zunit_color yellow '‼') Warnings    $warnings                 "
   echo
 
   [[ -n $output_text ]] && echo "TAP report written at $PWD/$logfile_text"
@@ -420,14 +420,14 @@ function _zunit_parse_argument() {
     # The test file does not contain the zunit shebang, therefore
     # we can't trust that running it will not be harmful, and throw
     # a fatal error
-    echo $(color red "File '$argument' is not a valid zunit test file") >&2
+    echo ($(_zunit_color red "File '$argument' is not a valid zunit test file") >&2
     echo "Test files must contain the following shebang on the first line" >&2
     echo "  #!/usr/bin/env zunit" >&2
     exit 126
   fi
 
   # The file could not be found, so we throw a fatal error
-  echo $(color red "Test file or directory '$argument' could not be found") >&2
+  echo ($(_zunit_color red "Test file or directory '$argument' could not be found") >&2
   exit 126
 }
 
@@ -466,7 +466,7 @@ function _zunit_run() {
   # TAP output is disabled
   if [[ -z $tap ]]; then
     # Print version information
-    echo $(color yellow 'Launching ZUnit')
+    echo ($(_zunit_color yellow 'Launching ZUnit')
     echo "ZUnit: $(_zunit_version)"
     echo "ZSH:   $(zsh --version)"
     echo
@@ -477,14 +477,14 @@ function _zunit_run() {
     # Make sure we have a config file, otherwise we can't determine
     # which directory to write logs to
     if [[ $missing_config -eq 1 ]]; then
-      echo $(color red '.zunit.yml could not be found. Run `zunit init`')
+      echo ($(_zunit_color red '.zunit.yml could not be found. Run `zunit init`')
       exit 1
     fi
 
     # If the output directory still isn't defined, it must not
     # be defined in the config file
     if [[ -z $zunit_config_directories_output ]]; then
-      echo $(color red 'Output directory must be specified in .zunit.yml')
+      echo ($(_zunit_color red 'Output directory must be specified in .zunit.yml')
       exit 1
     fi
   fi
@@ -509,7 +509,7 @@ function _zunit_run() {
     # Check that the support directory exists
     local support="$zunit_config_directories_support"
     if [[ ! -d $support ]]; then
-      echo $(color red "Support directory at $support is missing")
+      echo ($(_zunit_color red "Support directory at $support is missing")
       exit 1
     fi
 
@@ -517,7 +517,7 @@ function _zunit_run() {
     # and run it if it is available
     if [[ -f "$support/bootstrap" ]]; then
       source "$support/bootstrap"
-      echo "$(color green '✔') Sourced bootstrap script $support/bootstrap"
+      echo "($(_zunit_color green '✔') Sourced bootstrap script $support/bootstrap"
     fi
   fi
 

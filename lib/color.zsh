@@ -4,7 +4,7 @@
 #
 #!/usr/bin/env zsh
 
-function color() {
+function _zunit_color() {
   local color=$1 style=$2 b=0
 
   shift

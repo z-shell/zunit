@@ -8,10 +8,10 @@
 # Output usage information and exit
 ###
 function _zunit_init_usage() {
-  echo "$(color yellow 'Usage:')"
+  echo "($(_zunit_color yellow 'Usage:')"
   echo "  zunit init [options]"
   echo
-  echo "$(color yellow 'Options:')"
+  echo "($(_zunit_color yellow 'Options:')"
   echo "  -h, --help            Output help text and exit"
   echo "  -g, --github-actions  Generate .github/workflows/zunit.yml in project"
   echo "  -t, --travis          Generate legacy .travis.yml in project"
@@ -117,7 +117,7 @@ jobs:
   # Check that a config file doesn't already exist so that
   # we don't overwrite it
   if [[ -f "$PWD/.zunit.yml" ]]; then
-    echo $(color yellow "ZUnit config file already exists at $PWD/.zunit.yml. Skipping...")
+    echo ($(_zunit_color yellow "ZUnit config file already exists at $PWD/.zunit.yml. Skipping...")
   else
     # Write the contents to the config file
     echo "Writing ZUnit config file to $PWD/.zunit.yml"
@@ -127,7 +127,7 @@ jobs:
   # Check that the tests directory doesn't already exist so that
   # we don't overwrite it
   if [[ -d "$PWD/tests" ]]; then
-    echo $(color yellow "Test directory already exists at $PWD/tests. Skipping...")
+    echo ($(_zunit_color yellow "Test directory already exists at $PWD/tests. Skipping...")
   else
     echo "Creating test directory at $PWD/tests"
     # Create the directory structure for tests
@@ -142,7 +142,7 @@ jobs:
   # If GitHub Actions config has been requested
   if [[ -n $with_github_actions ]]; then
     if [[ -f "$PWD/.github/workflows/zunit.yml" ]]; then
-      echo $(color yellow "GitHub Actions workflow already exists at $PWD/.github/workflows/zunit.yml. Skipping...")
+      echo ($(_zunit_color yellow "GitHub Actions workflow already exists at $PWD/.github/workflows/zunit.yml. Skipping...")
     else
       echo "Writing GitHub Actions workflow to $PWD/.github/workflows/zunit.yml"
       mkdir -p "$PWD/.github/workflows"
@@ -155,7 +155,7 @@ jobs:
     # Check that a travis config doesn't already exist so that
     # we don't overwrite it
     if [[ -f "$PWD/.travis.yml" ]]; then
-      echo $(color yellow "Travis config already exists at $PWD/.travis.yml. Skipping...")
+      echo ($(_zunit_color yellow "Travis config already exists at $PWD/.travis.yml. Skipping...")
     else
       echo "Writing Travis CI config to $PWD/.travis.yml"
       # Write the contents to the config file

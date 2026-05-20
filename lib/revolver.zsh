@@ -4,8 +4,8 @@
 # Maintained by z-shell/src — https://github.com/z-shell/src
 #
 
-local -A _revolver_spinners
-_revolver_spinners=(
+local -A revolver_spinners
+revolver_spinners=(
   'dots' '0.08 ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏'
   'dots2' '0.08 ⣾ ⣽ ⣻ ⢿ ⡿ ⣟ ⣯ ⣷'
   'dots3' '0.08 ⠋ ⠙ ⠚ ⠞ ⠖ ⠦ ⠴ ⠲ ⠳ ⠓'
@@ -66,7 +66,7 @@ _revolver_spinners=(
 ###
 # Output usage information and exit
 ###
-function _revolver_usage() {
+function revolver_usage() {
   echo "\033[0;33mUsage:\033[0;m"
   echo "  revolver [options] <command> <message>"
   echo
@@ -85,7 +85,7 @@ function _revolver_usage() {
 ###
 # The main revolver process, which contains the loop
 ###
-function _revolver_process() {
+function revolver_process() {
   local dir statefile state msg pid="$1" spinner_index=0
 
   # Find the directory and load the statefile
@@ -94,7 +94,7 @@ function _revolver_process() {
 
   # The frames that, when animated, will make up
   # our spinning indicator
-  frames=(${(@z)_revolver_spinners[$style]})
+  frames=(${(@z)revolver_spinners[$style]})
   interval=${(@z)frames[1]}
   shift frames
 
@@ -123,7 +123,7 @@ function _revolver_process() {
 
     # Output the current spinner frame, and add a
     # slight delay before the next one
-    _revolver_spin
+    revolver_spin
     sleep ${interval:-"0.1"}
   done
 }
@@ -131,7 +131,7 @@ function _revolver_process() {
 ###
 # Output the spinner itself, along with a message
 ###
-function _revolver_spin() {
+function revolver_spin() {
   local dir statefile state pid frame
 
   # ZSH arrays start at 1, so we need to bump the index if it's 0
@@ -162,7 +162,7 @@ function _revolver_spin() {
 ###
 # Stop the current spinner process
 ###
-function _revolver_stop() {
+function revolver_stop() {
   local dir statefile state pid
 
   # Find the directory and load the statefile
@@ -196,7 +196,7 @@ function _revolver_stop() {
 
 ###
 # Update the message being displayed
-function _revolver_update() {
+function revolver_update() {
   local dir statefile state pid msg="$1"
 
   # Find the directory and load the statefile
@@ -228,7 +228,7 @@ function _revolver_update() {
 ###
 # Create a new spinner with the specified message
 ###
-function _revolver_start() {
+function revolver_start() {
   local dir statefile msg="$1"
 
   # Find the directory and create it if it doesn't exist
@@ -248,7 +248,7 @@ function _revolver_start() {
   fi
 
   # Start the spinner process in the background
-  _revolver_process $PPID &!
+  revolver_process $PPID &!
 
   # Save the current state to the statefile
   echo "$! $msg" >! $statefile
@@ -257,8 +257,8 @@ function _revolver_start() {
 ###
 # Demonstrate each of the included spinner styles
 ###
-function _revolver_demo() {
-  for style in "${(@k)_revolver_spinners[@]}"; do
+function revolver_demo() {
+  for style in "${(@k)revolver_spinners[@]}"; do
     revolver --style $style start $style
     sleep 2
     revolver stop
@@ -268,7 +268,7 @@ function _revolver_demo() {
 ###
 # Handle command input
 ###
-function _revolver() {
+function revolver() {
   # Get the context from the first parameter
   local help version style ctx="$1"
 
@@ -280,7 +280,7 @@ function _revolver() {
 
   # Output usage information and exit
   if [[ -n $help ]]; then
-    _revolver_usage
+    revolver_usage
     exit 0
   fi
 
@@ -299,8 +299,8 @@ function _revolver() {
     ctx="$1"
   fi
 
-  if [[ -z $_revolver_spinners[$style] ]]; then
-    echo $(color red "Spinner '$style' is not recognised")
+  if [[ -z $revolver_spinners[$style] ]]; then
+    echo $(_zunit_color red "Spinner '$style' is not recognised")
     exit 1
   fi
 
@@ -308,7 +308,7 @@ function _revolver() {
     start|update|stop|demo)
       # Check if a valid command is passed,
       # and if so, run it
-      _revolver_${ctx} "${(@)@:2}"
+      revolver_${ctx} "${(@)@:2}"
       ;;
     *)
       # If the context is not recognised,
@@ -319,4 +319,3 @@ function _revolver() {
   esac
 }
 
-_revolver "$@"
