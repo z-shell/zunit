@@ -17,8 +17,8 @@ jobs:
       matrix:
         zsh_version: ["5.5.1", "5.6.2", "5.7.1", "5.8", "5.8.1", "5.9"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: docker/setup-buildx-action@4d04d5d2235566ea9c44d6d2594696e5d0117bbb # v4.0.0
       - name: Build test image
         run: |
           cat > Dockerfile.ci <<'EOF'
