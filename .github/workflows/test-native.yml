@@ -23,8 +23,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -yq zsh
           mkdir -p .bin
-          curl -fsSL 'https://raw.githubusercontent.com/z-shell/revolver/master/revolver' > .bin/revolver
-          curl -fsSL 'https://raw.githubusercontent.com/z-shell/color/master/color.zsh' > .bin/color
           chmod u+x .bin/{color,revolver}
       - name: Build
         run: ./build.zsh

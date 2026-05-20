@@ -76,10 +76,8 @@ allow_risky: false"
 install:
   - mkdir .bin
   - curl -L https://github.com/zunit-zsh/zunit/releases/download/v$(_zunit_version)/zunit > .bin/zunit
-  - curl -L https://raw.githubusercontent.com/z-shell/revolver/master/revolver > .bin/revolver
-  - curl -L https://raw.githubusercontent.com/z-shell/color/master/color.zsh > .bin/color
 before_script:
-  - chmod u+x .bin/{color,revolver,zunit}
+  - chmod u+x .bin/{zunit}
   - export PATH=\"\$PWD/.bin:\$PATH\"
 script: zunit"
 
@@ -108,9 +106,7 @@ jobs:
           sudo apt-get install -yq zsh
           mkdir -p .bin
           curl -fsSL 'https://github.com/zunit-zsh/zunit/releases/download/v${zunit_version}/zunit' > .bin/zunit
-          curl -fsSL 'https://raw.githubusercontent.com/z-shell/revolver/master/revolver' > .bin/revolver
-          curl -fsSL 'https://raw.githubusercontent.com/z-shell/color/master/color.zsh' > .bin/color
-          chmod u+x .bin/{color,revolver,zunit}
+          chmod u+x .bin/{zunit}
       - name: Test
         run: PATH=\"\$PWD/.bin:\$PATH\" zunit --tap tests"
 
