@@ -159,9 +159,13 @@ function _zunit_execute_test() {
         __zunit_tmp_test_function &
         pid=$!
 
+        # Guard flag: set to 1 once the test completes so the ALRM
+        # handler ignores signals that arrive in the cleanup window
+        local test_done=0
+
         # Use a trap to handle the timeout. We send an ALRM signal
         # to the current process, which we catch here
-        trap "kill -9 $pid 2>/dev/null; echo 'Test took too long to run. Terminated after $time_limit seconds'; exit 78" ALRM
+        trap "[[ \$test_done -eq 1 ]] || { kill -9 $pid 2>/dev/null; echo 'Test took too long to run. Terminated after $time_limit seconds'; exit 78 }" ALRM
 
         # Launch a timer in the background
         # We use a subshell to ensure we can kill it easily
@@ -175,9 +179,10 @@ function _zunit_execute_test() {
         wait $pid
         local state=$?
 
-        # Clean up the timer and the trap
-        kill $timer_pid 2>/dev/null
+        # Mark done before disarming: any ALRM arriving now becomes a no-op
+        test_done=1
         trap - ALRM
+        kill $timer_pid 2>/dev/null
 
         return $state
       }
@@ -553,7 +558,7 @@ function _zunit_run() {
 
   # If no arguments are passed, try to work out where the tests are
   if [[ ${#arguments} -eq 0 ]]; then
-    # Check for a path defined in .zunit.yml
+    # Check for a path defined in config
     if [[ -n $zunit_config_directories_tests ]]; then
       arguments=("$zunit_config_directories_tests")
 

@@ -57,7 +57,10 @@ function _zunit() {
   local help version ctx="$1" missing_dependencies=0 missing_config=1
 
   if [[ -f .zunit.zsh ]]; then
-    source .zunit.zsh
+    if ! source .zunit.zsh 2>/dev/null; then
+      echo "\033[0;31mFailed to source .zunit.zsh config file\033[0;m" >&2
+      exit 1
+    fi
     [[ -n $ZUNIT_TESTS_DIR ]] && zunit_config_directories_tests="$ZUNIT_TESTS_DIR"
     [[ -n $ZUNIT_OUTPUT_DIR ]] && zunit_config_directories_output="$ZUNIT_OUTPUT_DIR"
     [[ -n $ZUNIT_SUPPORT_DIR ]] && zunit_config_directories_support="$ZUNIT_SUPPORT_DIR"
