@@ -10,10 +10,10 @@
 ###
 function _zunit_fail_shutdown() {
   # Kill the revolver process
-  [[ -z $tap ]] && revolver stop
+  [[ -z $tap ]] && _zunit_revolver stop
 
   # Print a message to screen
-  echo $(color red bold 'Execution halted after failure')
+  echo $(_zunit_color red bold 'Execution halted after failure')
 
   # Record the time at which testing ended
   end_time=$((EPOCHREALTIME*1000))
@@ -49,7 +49,7 @@ function _zunit_success() {
     return
   fi
 
-  echo "$(color green '✔') ${name}"
+  echo "$(_zunit_color green '✔') ${name}"
 }
 
 ###
@@ -67,9 +67,9 @@ function _zunit_failure() {
   if [[ -n $tap ]]; then
     _zunit_tap_failure "$@"
   else
-    echo "$(color red '✘' ${name})"
-    echo "  $(color red underline ${message})"
-    echo "  $(color red ${output})"
+    echo "$(_zunit_color red '✘' ${name})"
+    echo "  $(_zunit_color red underline ${message})"
+    echo "  $(_zunit_color red ${output})"
   fi
 
   [[ -n $fail_fast ]] && _zunit_fail_shutdown
@@ -90,9 +90,9 @@ function _zunit_error() {
   if [[ -n $tap ]]; then
     _zunit_tap_error "$@"
   else
-    echo "$(color red '‼' ${name})"
-    echo "  $(color red underline ${message})"
-    echo "  $(color red ${output})"
+    echo "$(_zunit_color red '‼' ${name})"
+    echo "  $(_zunit_color red underline ${message})"
+    echo "  $(_zunit_color red ${output})"
   fi
 
   [[ -n $fail_fast ]] && _zunit_fail_shutdown
@@ -115,8 +115,8 @@ function _zunit_warn() {
     return
   fi
 
-  echo "$(color yellow '‼') ${name}"
-  echo "  $(color yellow underline ${message})"
+  echo "$(_zunit_color yellow '‼') ${name}"
+  echo "  $(_zunit_color yellow underline ${message})"
 }
 
 ###
@@ -136,6 +136,6 @@ function _zunit_skip() {
     return
   fi
 
-  echo "$(color magenta '●') Skipped: ${name}"
+  echo "$(_zunit_color magenta '●') Skipped: ${name}"
   echo "  \033[0;38;5;242m# ${message}\033[0;m"
 }

@@ -29,5 +29,3 @@ function _zunit_color() {
     *)          echo "\033[${b};38;5;$(( ${color} ))m${@}\033[0;m" ;;
   esac
 }
-
-color "$@"

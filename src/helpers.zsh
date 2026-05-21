@@ -4,39 +4,14 @@
 # Helpers for use within tests #
 ################################
 
-###
-# Colorise and style a string
-###
 function color() {
-  local color=$1 style=$2 b=0
-
-  shift
-
-  case $style in
-    bold|b)           b=1; shift ;;
-    italic|i)         b=2; shift ;;
-    underline|u)      b=4; shift ;;
-    inverse|in)       b=7; shift ;;
-    strikethrough|s)  b=9; shift ;;
-  esac
-
-  case $color in
-    black|b)    echo "\033[${b};30m${@}\033[0;m" ;;
-    red|r)      echo "\033[${b};31m${@}\033[0;m" ;;
-    green|g)    echo "\033[${b};32m${@}\033[0;m" ;;
-    yellow|y)   echo "\033[${b};33m${@}\033[0;m" ;;
-    blue|bl)    echo "\033[${b};34m${@}\033[0;m" ;;
-    magenta|m)  echo "\033[${b};35m${@}\033[0;m" ;;
-    cyan|c)     echo "\033[${b};36m${@}\033[0;m" ;;
-    white|w)    echo "\033[${b};37m${@}\033[0;m" ;;
-    *)          echo "\033[${b};38;5;$(( ${color} ))m${@}\033[0;m" ;;
-  esac
+  _zunit_color "$@"
 }
 
 ###
 # Find a file, and load it into the environment
 ###
-function load() {
+function _zunit_load() {
   local name="$1"
   local filename
 
@@ -66,6 +41,10 @@ function load() {
   # and fail the test
   echo "File $filename does not exist" >&2
   exit 1
+}
+
+function load() {
+  _zunit_load "$@"
 }
 
 ###
@@ -233,7 +212,7 @@ function assert() {
 
   # Check that the requested assertion method exists
   if (( ! $+functions[_zunit_assert_${assertion}] )); then
-    echo "$(color red "Assertion $assertion does not exist")"
+    echo "$(_zunit_color red "Assertion $assertion does not exist")"
     exit 127
   fi
 
@@ -258,17 +237,21 @@ function assert() {
 ###
 # Mark the current test as passed
 ###
-function pass() {
+function _zunit_pass() {
   # Exit code 0 will end the test, and mark is as passed. The reason for
   # skipping is echoed to stdout first, so that it can be picked up by the
   # error handler
   exit 0
 }
 
+function pass() {
+  _zunit_pass "$@"
+}
+
 ###
 # Mark the current test as failed
 ###
-function fail() {
+function _zunit_fail() {
   # Any non-zero exit code without special meaning will mark the test as failed.
   # The failure message is echoed to stdout first, so that it can be picked up
   # by the error handler
@@ -276,26 +259,38 @@ function fail() {
   exit 1
 }
 
+function fail() {
+  _zunit_fail "$@"
+}
+
 ###
-# Mark the current test as skipped
+# Mark the current test as errored
 ###
-function error() {
+function _zunit_test_error() {
   # Exit code 78 will end the test, and report an error. The error message
   # is echoed to stdout first, so that it can be picked up by the error handler
   echo "$@"
   exit 78
 }
 
+function error() {
+  _zunit_test_error "$@"
+}
+
 ###
 # Mark the current test as skipped
 ###
-function skip() {
+function _zunit_test_skip() {
   # Exit code 48 will skip the test, so all we have to do
   # to mark the test as skipped is exit.
   # The reason for skipping is echoed to stdout first, so that
   # it can be picked up by the error handler
   echo "$@"
   exit 48
+}
+
+function skip() {
+  _zunit_test_skip "$@"
 }
 
 # vim:ft=zsh:et:sts=2:sw=2

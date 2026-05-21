@@ -25,14 +25,6 @@
   assert "$output" contains 'Suppress warnings generated for risky tests'
 }
 
-@test 'run reports the active revolver repository when dependency is missing' {
-  PATH='/usr/bin:/bin'
-  run "$PWD/zunit" run
-
-  assert "$state" equals 1
-  assert "$output" contains 'https://github.com/z-shell/revolver'
-}
-
 @test 'report output without config points users to zunit init' {
   local sandbox stubbin
   sandbox="$(mktemp -d)"
@@ -50,7 +42,7 @@
   run "$OLDPWD/zunit" --output-text
 
   assert "$state" equals 1
-  assert "$output" contains '.zunit.yml could not be found. Run `zunit init`'
+  assert "$output" contains '.zunit.zsh could not be found. Run `zunit init`'
 }
 
 @test 'init help documents GitHub Actions bootstrap support' {
@@ -85,7 +77,7 @@
   run "$OLDPWD/zunit" init
 
   assert "$state" equals 0
-  assert "$sandbox/.zunit.yml" exists
+  assert "$sandbox/.zunit.zsh" exists
 }
 
 @test 'generated GitHub Actions workflow installs and runs zunit for consumer projects' {
