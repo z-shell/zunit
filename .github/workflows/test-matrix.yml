@@ -31,8 +31,6 @@ jobs:
             && ./configure --prefix=/usr/local \
             && make \
             && make install
-          RUN mkdir -p /opt/zunit/.bin \
-            && chmod u+x /opt/zunit/.bin/{color,revolver}
           WORKDIR /opt/zunit
           EOF
           docker build --build-arg ZSH_VERSION="${{ matrix.zsh_version }}" -f Dockerfile.ci -t "zunit-ci:${{ matrix.zsh_version }}" .
@@ -42,4 +40,4 @@ jobs:
             --volume "$PWD:/opt/zunit" \
             --workdir /opt/zunit \
             "zunit-ci:${{ matrix.zsh_version }}" \
-            sh -lc 'export PATH="/opt/zunit/.bin:$PATH"; ./build.zsh >/dev/null; ./zunit --tap tests'
+            sh -lc 'zsh build.zsh >/dev/null && ./zunit --tap tests'

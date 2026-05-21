@@ -22,9 +22,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -yq zsh
-          mkdir -p .bin
-          chmod u+x .bin/{color,revolver}
       - name: Build
-        run: ./build.zsh
+        run: zsh build.zsh
       - name: Run test suite
-        run: PATH="$PWD/.bin:$PATH" ./zunit --tap tests
+        run: ./zunit --tap tests
