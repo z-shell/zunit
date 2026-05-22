@@ -8,10 +8,10 @@
 # Output usage information and exit
 ###
 function _zunit_init_usage() {
-  echo "($(_zunit_color yellow 'Usage:')"
+  echo "$(_zunit_color yellow 'Usage:')"
   echo "  zunit init [options]"
   echo
-  echo "($(_zunit_color yellow 'Options:')"
+  echo "$(_zunit_color yellow 'Options:')"
   echo "  -h, --help            Output help text and exit"
   echo "  -g, --github-actions  Generate .github/workflows/zunit.yml in project"
   echo "  -t, --travis          Generate legacy .travis.yml in project"
@@ -46,21 +46,22 @@ function _zunit_init() {
     g=with_github_actions -github-actions=with_github_actions \
     t=with_travis -travis=with_travis
 
-  # The contents of .zunit.yml
-  local yaml="tap: false
-directories:
-  tests: tests
-  output: tests/_output
-  support: tests/_support
-time_limit: 0
-fail_fast: false
-allow_risky: false"
+  # The contents of .zunit.zsh
+  local zunit_zsh="# ZUnit configuration
+ZUNIT_TESTS_DIR='tests'
+ZUNIT_OUTPUT_DIR='tests/_output'
+ZUNIT_SUPPORT_DIR='tests/_support'
+ZUNIT_FAIL_FAST=false
+ZUNIT_ALLOW_RISKY=false
+ZUNIT_TIME_LIMIT=0
+ZUNIT_TAP=false
+ZUNIT_VERBOSE=false"
 
   # An example test file
   local example="#!/usr/bin/env zunit
 
 @test 'Example' {
-  assert "'"true"'" same_as "'"false"'"
+  assert \"true\" same_as \"true\"
 }"
 
   # An empty bootstrap script
@@ -112,18 +113,20 @@ jobs:
 
   # Check that a config file doesn't already exist so that
   # we don't overwrite it
-  if [[ -f "$PWD/.zunit.yml" ]]; then
-    echo ($(_zunit_color yellow "ZUnit config file already exists at $PWD/.zunit.yml. Skipping...")
+  if [[ -f "$PWD/.zunit.zsh" ]]; then
+    echo "$(_zunit_color yellow "ZUnit config file already exists at $PWD/.zunit.zsh. Skipping...")"
+  elif [[ -f "$PWD/.zunit.yml" ]]; then
+    echo "$(_zunit_color yellow "ZUnit config file already exists at $PWD/.zunit.yml. Skipping...")"
   else
     # Write the contents to the config file
-    echo "Writing ZUnit config file to $PWD/.zunit.yml"
-    echo "$yaml" > "$PWD/.zunit.yml"
+    echo "Writing ZUnit config file to $PWD/.zunit.zsh"
+    echo "$zunit_zsh" > "$PWD/.zunit.zsh"
   fi
 
   # Check that the tests directory doesn't already exist so that
   # we don't overwrite it
   if [[ -d "$PWD/tests" ]]; then
-    echo ($(_zunit_color yellow "Test directory already exists at $PWD/tests. Skipping...")
+    echo "$(_zunit_color yellow "Test directory already exists at $PWD/tests. Skipping...")"
   else
     echo "Creating test directory at $PWD/tests"
     # Create the directory structure for tests
@@ -138,7 +141,7 @@ jobs:
   # If GitHub Actions config has been requested
   if [[ -n $with_github_actions ]]; then
     if [[ -f "$PWD/.github/workflows/zunit.yml" ]]; then
-      echo ($(_zunit_color yellow "GitHub Actions workflow already exists at $PWD/.github/workflows/zunit.yml. Skipping...")
+      echo "$(_zunit_color yellow "GitHub Actions workflow already exists at $PWD/.github/workflows/zunit.yml. Skipping...")"
     else
       echo "Writing GitHub Actions workflow to $PWD/.github/workflows/zunit.yml"
       mkdir -p "$PWD/.github/workflows"
@@ -151,7 +154,7 @@ jobs:
     # Check that a travis config doesn't already exist so that
     # we don't overwrite it
     if [[ -f "$PWD/.travis.yml" ]]; then
-      echo ($(_zunit_color yellow "Travis config already exists at $PWD/.travis.yml. Skipping...")
+      echo "$(_zunit_color yellow "Travis config already exists at $PWD/.travis.yml. Skipping...")"
     else
       echo "Writing Travis CI config to $PWD/.travis.yml"
       # Write the contents to the config file

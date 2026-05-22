@@ -66,7 +66,7 @@ revolver_spinners=(
 ###
 # Output usage information and exit
 ###
-function revolver_usage() {
+function _zunit_revolver_usage() {
   echo "\033[0;33mUsage:\033[0;m"
   echo "  revolver [options] <command> <message>"
   echo
@@ -85,7 +85,7 @@ function revolver_usage() {
 ###
 # The main revolver process, which contains the loop
 ###
-function revolver_process() {
+function _zunit_revolver_process() {
   local dir statefile state msg pid="$1" spinner_index=0
 
   # Find the directory and load the statefile
@@ -123,7 +123,7 @@ function revolver_process() {
 
     # Output the current spinner frame, and add a
     # slight delay before the next one
-    revolver_spin
+    _zunit_revolver_spin
     sleep ${interval:-"0.1"}
   done
 }
@@ -131,7 +131,7 @@ function revolver_process() {
 ###
 # Output the spinner itself, along with a message
 ###
-function revolver_spin() {
+function _zunit_revolver_spin() {
   local dir statefile state pid frame
 
   # ZSH arrays start at 1, so we need to bump the index if it's 0
@@ -162,12 +162,12 @@ function revolver_spin() {
 ###
 # Stop the current spinner process
 ###
-function revolver_stop() {
+function _zunit_revolver_stop() {
   local dir statefile state pid
 
   # Find the directory and load the statefile
   dir=${REVOLVER_DIR:-"${ZDOTDIR:-$HOME}/.revolver"}
-  statefile="$dir/$PPID"
+  statefile="$dir/$$"
 
   # If the statefile does not exist, raise an error.
   # The spinner process itself performs the same check
@@ -196,12 +196,12 @@ function revolver_stop() {
 
 ###
 # Update the message being displayed
-function revolver_update() {
+function _zunit_revolver_update() {
   local dir statefile state pid msg="$1"
 
   # Find the directory and load the statefile
   dir=${REVOLVER_DIR:-"${ZDOTDIR:-$HOME}/.revolver"}
-  statefile="$dir/$PPID"
+  statefile="$dir/$$"
 
   # If the statefile does not exist, raise an error.
   # The spinner process itself performs the same check
@@ -228,7 +228,7 @@ function revolver_update() {
 ###
 # Create a new spinner with the specified message
 ###
-function revolver_start() {
+function _zunit_revolver_start() {
   local dir statefile msg="$1"
 
   # Find the directory and create it if it doesn't exist
@@ -238,7 +238,7 @@ function revolver_start() {
   fi
 
   # Create the filename for the statefile
-  statefile="$dir/$PPID"
+  statefile="$dir/$$"
 
   touch $statefile
   if [[ ! -f $statefile ]]; then
@@ -248,7 +248,7 @@ function revolver_start() {
   fi
 
   # Start the spinner process in the background
-  revolver_process $PPID &!
+  _zunit_revolver_process $$ &!
 
   # Save the current state to the statefile
   echo "$! $msg" >! $statefile
@@ -257,18 +257,18 @@ function revolver_start() {
 ###
 # Demonstrate each of the included spinner styles
 ###
-function revolver_demo() {
+function _zunit_revolver_demo() {
   for style in "${(@k)revolver_spinners[@]}"; do
-    revolver --style $style start $style
+    _zunit_revolver --style $style start $style
     sleep 2
-    revolver stop
+    _zunit_revolver stop
   done
 }
 
 ###
 # Handle command input
 ###
-function revolver() {
+function _zunit_revolver() {
   # Get the context from the first parameter
   local help version style ctx="$1"
 
@@ -280,7 +280,7 @@ function revolver() {
 
   # Output usage information and exit
   if [[ -n $help ]]; then
-    revolver_usage
+    _zunit_revolver_usage
     exit 0
   fi
 
@@ -308,7 +308,7 @@ function revolver() {
     start|update|stop|demo)
       # Check if a valid command is passed,
       # and if so, run it
-      revolver_${ctx} "${(@)@:2}"
+      _zunit_revolver_${ctx} "${(@)@:2}"
       ;;
     *)
       # If the context is not recognised,

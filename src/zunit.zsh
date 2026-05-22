@@ -2,6 +2,18 @@
 # -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
 # vim: ft=zsh sw=2 ts=2 et
 
+0="${ZERO:-${${0:#$ZSH_ARGZERO}:-${(%):-%N}}}"
+0="${${(M)0:#/*}:-$PWD/$0}"
+
+# Register the plugin's directory
+typeset -gA Plugins
+Plugins[zunit]="${0:h}"
+
+# Add to fpath if not already handled
+if [[ $PMSPEC != *f* ]]; then
+  fpath+=( "${0:h}/functions" )
+fi
+
 setopt extendedglob typesetsilent
 
 ######################
@@ -12,14 +24,14 @@ setopt extendedglob typesetsilent
 # Output usage information and exit
 ###
 function _zunit_usage() {
-  echo "$(color yellow 'Usage:')"
+  echo "$(_zunit_color yellow 'Usage:')"
   echo "  zunit [options] [command] [tests...]"
   echo
-  echo "$(color yellow 'Commands:')"
+  echo "$(_zunit_color yellow 'Commands:')"
   echo "  init               Bootstrap zunit in a new project"
   echo "  run [tests...]     Run tests"
   echo
-  echo "$(color yellow 'Options:')"
+  echo "$(_zunit_color yellow 'Options:')"
   echo "  -h, --help         Output help text and exit"
   echo "  -v, --version      Output version information and exit"
   echo "  -f, --fail-fast    Stop the test runner immediately after the first failure"
@@ -44,7 +56,21 @@ function _zunit_version() {
 function _zunit() {
   local help version ctx="$1" missing_dependencies=0 missing_config=1
 
-  if [[ -f .zunit.yml ]]; then
+  if [[ -f .zunit.zsh ]]; then
+    if ! source .zunit.zsh 2>/dev/null; then
+      echo "\033[0;31mFailed to source .zunit.zsh config file\033[0;m" >&2
+      exit 1
+    fi
+    [[ -n $ZUNIT_TESTS_DIR ]] && zunit_config_directories_tests="$ZUNIT_TESTS_DIR"
+    [[ -n $ZUNIT_OUTPUT_DIR ]] && zunit_config_directories_output="$ZUNIT_OUTPUT_DIR"
+    [[ -n $ZUNIT_SUPPORT_DIR ]] && zunit_config_directories_support="$ZUNIT_SUPPORT_DIR"
+    [[ -n $ZUNIT_FAIL_FAST ]] && zunit_config_fail_fast="$ZUNIT_FAIL_FAST"
+    [[ -n $ZUNIT_ALLOW_RISKY ]] && zunit_config_allow_risky="$ZUNIT_ALLOW_RISKY"
+    [[ -n $ZUNIT_TIME_LIMIT ]] && zunit_config_time_limit="$ZUNIT_TIME_LIMIT"
+    [[ -n $ZUNIT_TAP ]] && zunit_config_tap="$ZUNIT_TAP"
+    [[ -n $ZUNIT_VERBOSE ]] && zunit_config_verbose="$ZUNIT_VERBOSE"
+    missing_config=0
+  elif [[ -f .zunit.yml ]]; then
     # Try and parse the config file within a subprocess,
     # to avoid killing the main thread
     $(eval $(_zunit_parse_yaml .zunit.yml 'zunit_config_') >/dev/null 2>&1)
@@ -76,8 +102,8 @@ function _zunit() {
   # tests. Introspection and bootstrap commands should remain usable before
   # dependencies are installed.
   if [[ -z $help && $ctx != init ]]; then
-    if ! type revolver >/dev/null 2>&1; then
-      echo "\033[0;31mMissing required dependency: Revolver - https://github.com/z-shell/revolver\033[0;m" >&2
+    if ! (( $+functions[_zunit_revolver] )); then
+      echo "\033[0;31mInternal error: _zunit_revolver function missing. Try rebuilding zunit.\033[0;m" >&2
       exit 1
     fi
   fi

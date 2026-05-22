@@ -8,10 +8,10 @@
 # Output usage information and exit
 ###
 function _zunit_run_usage() {
-  echo "($(_zunit_color yellow 'Usage:')"
+  echo "$(_zunit_color yellow 'Usage:')"
   echo "  zunit run [options] [tests...]"
   echo
-  echo "($(_zunit_color yellow 'Options:')"
+  echo "$(_zunit_color yellow 'Options:')"
   echo "  -h, --help             Output help text and exit"
   echo "  -v, --version          Output version information and exit"
   echo "  -f, --fail-fast        Stop the test runner immediately after the first failure"
@@ -49,12 +49,12 @@ function _zunit_output_results() {
   echo
   echo "$total tests run in $(_zunit_human_time $elapsed)"
   echo
-  echo "($(_zunit_color yellow underline 'Results')                        "
-  echo "($(_zunit_color green '✔') Passed      $passed                    "
-  echo "($(_zunit_color red '✘') Failed      $failed                      "
-  echo "($(_zunit_color red '‼') Errors      $errors                      "
-  echo "($(_zunit_color magenta '●') Skipped     $skipped                 "
-  echo "($(_zunit_color yellow '‼') Warnings    $warnings                 "
+  echo "$(_zunit_color yellow underline 'Results')                        "
+  echo "$(_zunit_color green '✔') Passed      $passed                    "
+  echo "$(_zunit_color red '✘') Failed      $failed                      "
+  echo "$(_zunit_color red '‼') Errors      $errors                      "
+  echo "$(_zunit_color magenta '●') Skipped     $skipped                 "
+  echo "$(_zunit_color yellow '‼') Warnings    $warnings                 "
   echo
 
   [[ -n $output_text ]] && echo "TAP report written at $PWD/$logfile_text"
@@ -69,7 +69,7 @@ function _zunit_execute_test() {
 
   if [[ -n $body ]] && [[ -n $name ]]; then
     # Update the progress indicator
-    [[ -z $tap ]] && revolver update "${name}"
+    [[ -z $tap ]] && _zunit_revolver update "${name}"
 
     # Make sure we don't already have a function defined
     (( $+functions[__zunit_tmp_test_function] )) && \
@@ -102,7 +102,9 @@ function _zunit_execute_test() {
 
       # The test body is printed here, so when we eval the wrapper
       # function it will be read as part of the body of this function
-      ${body}
+      () {
+        ${body}
+      }
 
       # If a teardown function is defined, run it now
       if (( \$+functions[__zunit_test_teardown] )); then
@@ -149,35 +151,40 @@ function _zunit_execute_test() {
     if is-at-least 5.1.0 && [[ -n ${time_limit:#0} ]]; then
       # Create another wrapper function around the test
       __zunit_async_test_wrapper() {
-        local pid
-
-        # Get the current timestamp, and the time limit in ms, and use
-        # those to work out the kill time for the sub process
-        integer time_limit_ms=$(( time_limit * 1000 ))
-        integer time=$(( EPOCHREALTIME * 1000 ))
-        integer kill_time=$(( $time + $time_limit_ms ))
+        zmodload -i zsh/system
+        local pid timer_pid
+        local wrapper_pid=$sysparams[pid]
 
         # Launch the test function asynchronously and store its PID
         __zunit_tmp_test_function &
         pid=$!
 
-        # While the child process is still running
-        while kill -0 $pid >/dev/null 2>&1; do
-          # Check that the kill time has not yet been reached
-          time=$(( EPOCHREALTIME * 1000 ))
-          if [[ $time -gt $kill_time ]]; then
-            # The kill time has been reached, kill the child process,
-            # and exit the wrapper function
-            kill -9 $pid >/dev/null 2>&1
-            echo "Test took too long to run. Terminated after $time_limit seconds"
-            exit 78
-          fi
-        done
+        # Guard flag: set to 1 once the test completes so the ALRM
+        # handler ignores signals that arrive in the cleanup window
+        local test_done=0
 
-        # Use wait to get the exit code from the background process,
-        # and return that so that the test result can be deduced
+        # Use a trap to handle the timeout. We send an ALRM signal
+        # to the current process, which we catch here
+        trap "[[ \$test_done -eq 1 ]] || { kill -9 $pid 2>/dev/null; echo 'Test took too long to run. Terminated after $time_limit seconds'; exit 78 }" ALRM
+
+        # Launch a timer in the background
+        # We use a subshell to ensure we can kill it easily
+        # We redirect output to avoid the command substitution hang
+        { sleep $time_limit; kill -ALRM $wrapper_pid 2>/dev/null } >/dev/null 2>&1 &
+        timer_pid=$!
+
+        # Wait for the test process to finish. If the timer finishes
+        # first, it will send a signal to this process and the trap
+        # will be executed
         wait $pid
-        return $?
+        local state=$?
+
+        # Mark done before disarming: any ALRM arriving now becomes a no-op
+        test_done=1
+        trap - ALRM
+        kill $timer_pid 2>/dev/null
+
+        return $state
       }
 
       # Launch the async wrapper, and capture the output in a variable
@@ -245,7 +252,7 @@ function _zunit_run_testfile() {
   test_names=()
 
   # Update status message
-  [[ -z $tap ]] && revolver update "Loading tests from $testfile"
+  [[ -z $tap ]] && _zunit_revolver update "Loading tests from $testfile"
 
   # A regex pattern to match test declarations
   pattern='^ *@test  *([^ ].*)  *\{ *(.*)$'
@@ -420,14 +427,14 @@ function _zunit_parse_argument() {
     # The test file does not contain the zunit shebang, therefore
     # we can't trust that running it will not be harmful, and throw
     # a fatal error
-    echo ($(_zunit_color red "File '$argument' is not a valid zunit test file") >&2
+    echo "$(_zunit_color red \"File '$argument' is not a valid zunit test file\")" >&2
     echo "Test files must contain the following shebang on the first line" >&2
     echo "  #!/usr/bin/env zunit" >&2
     exit 126
   fi
 
   # The file could not be found, so we throw a fatal error
-  echo ($(_zunit_color red "Test file or directory '$argument' could not be found") >&2
+  echo "$(_zunit_color red \"Test file or directory '$argument' could not be found\")" >&2
   exit 126
 }
 
@@ -466,7 +473,7 @@ function _zunit_run() {
   # TAP output is disabled
   if [[ -z $tap ]]; then
     # Print version information
-    echo ($(_zunit_color yellow 'Launching ZUnit')
+    echo "$(_zunit_color yellow 'Launching ZUnit')"
     echo "ZUnit: $(_zunit_version)"
     echo "ZSH:   $(zsh --version)"
     echo
@@ -477,14 +484,14 @@ function _zunit_run() {
     # Make sure we have a config file, otherwise we can't determine
     # which directory to write logs to
     if [[ $missing_config -eq 1 ]]; then
-      echo ($(_zunit_color red '.zunit.yml could not be found. Run `zunit init`')
+      echo "$(_zunit_color red '.zunit.zsh could not be found. Run `zunit init`')"
       exit 1
     fi
 
     # If the output directory still isn't defined, it must not
     # be defined in the config file
     if [[ -z $zunit_config_directories_output ]]; then
-      echo ($(_zunit_color red 'Output directory must be specified in .zunit.yml')
+      echo "$(_zunit_color red 'Output directory must be specified in .zunit.zsh')"
       exit 1
     fi
   fi
@@ -509,7 +516,7 @@ function _zunit_run() {
     # Check that the support directory exists
     local support="$zunit_config_directories_support"
     if [[ ! -d $support ]]; then
-      echo ($(_zunit_color red "Support directory at $support is missing")
+      echo "$(_zunit_color red \"Support directory at $support is missing\")"
       exit 1
     fi
 
@@ -517,7 +524,7 @@ function _zunit_run() {
     # and run it if it is available
     if [[ -f "$support/bootstrap" ]]; then
       source "$support/bootstrap"
-      echo "($(_zunit_color green '✔') Sourced bootstrap script $support/bootstrap"
+      echo "$(_zunit_color green '✔') Sourced bootstrap script $support/bootstrap"
     fi
   fi
 
@@ -547,11 +554,11 @@ function _zunit_run() {
   testfiles=()
 
   # Start the progress indicator
-  [[ -z $tap ]] && revolver start 'Loading tests'
+  [[ -z $tap ]] && _zunit_revolver start 'Loading tests'
 
   # If no arguments are passed, try to work out where the tests are
   if [[ ${#arguments} -eq 0 ]]; then
-    # Check for a path defined in .zunit.yml
+    # Check for a path defined in config
     if [[ -n $zunit_config_directories_tests ]]; then
       arguments=("$zunit_config_directories_tests")
 
@@ -583,7 +590,7 @@ function _zunit_run() {
   [[ -n $output_html ]] && _zunit_html_footer >> $logfile_html
 
   # Output results to screen and kill the progress indicator
-  [[ -z $tap ]] && _zunit_output_results && revolver stop
+  [[ -z $tap ]] && _zunit_output_results && _zunit_revolver stop
 
   # If the total of ($passed + $skipped) is not equal to the
   # total, then there must have been failures, errors or warnings,
