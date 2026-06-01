@@ -1,4 +1,6 @@
 #!/usr/bin/env zsh
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
 # Source: https://github.com/molovo/revolver
 # License: MIT — Copyright (c) 2016 Joe Letchford
 # Maintained by z-shell/src — https://github.com/z-shell/src
