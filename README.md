@@ -29,6 +29,11 @@ coordinates used across the ecosystem.
 The Z-Shell mirror validates the project with GitHub Actions using native tests,
 Zsh syntax checks, and a scheduled Zsh compatibility matrix.
 
+As a maintained Z-Shell repository, this mirror follows the organization's
+[class-2 testing and CI strategy](https://github.com/z-shell/.github/blob/main/decisions/0009-testing-ci-strategy.md)
+and [repository settings baseline](https://github.com/z-shell/.github/blob/main/decisions/0013-repository-settings-baseline.md).
+Its fork status affects audit sampling, not the applicability of those policies.
+
 ## License
 
 Copyright (c) 2016 James Dinsdale <hi@molovo.co> (molovo.co)
