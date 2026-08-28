@@ -21,6 +21,7 @@
   fpath+=(/tmp/zunit-contract-functions)
   precmd_functions+=(_contract_fixture_leak)
   zstyle ':zunit-contract:test' mode on
+  zstyle -e ':zunit-contract:eval' mode 'reply=(dynamic)'
   zle -N zunit-contract-widget _contract_fixture_leak
   bindkey -M emacs '^Xz' zunit-contract-widget
   zunit_plugin_contract_snapshot leak_after
@@ -32,6 +33,7 @@
   assert "$output" contains 'parameter:_contract_fixture_parameter'
   assert "$output" contains 'module:zsh/stat'
   assert "$output" contains 'style::zunit-contract:test:mode'
+  assert "$output" contains 'style::zunit-contract:eval:mode'
   assert "$output" contains 'widget:zunit-contract-widget'
   assert "$output" contains 'path:@order'
   assert "$output" contains 'fpath:@order'

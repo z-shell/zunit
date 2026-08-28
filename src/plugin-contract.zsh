@@ -196,8 +196,14 @@ _zunit_plugin_contract_snapshot_traps_styles() {
     [[ -n $_zunit_plugin_contract_line ]] || continue
     _zunit_plugin_contract_words=(${(z)_zunit_plugin_contract_line})
     (( ${#_zunit_plugin_contract_words} >= 3 )) || continue
-    _zunit_plugin_contract_context=${(Q)_zunit_plugin_contract_words[2]}
-    _zunit_plugin_contract_property=${(Q)_zunit_plugin_contract_words[3]}
+    if [[ ${(Q)_zunit_plugin_contract_words[2]} == -e ]]; then
+      (( ${#_zunit_plugin_contract_words} >= 4 )) || continue
+      _zunit_plugin_contract_context=${(Q)_zunit_plugin_contract_words[3]}
+      _zunit_plugin_contract_property=${(Q)_zunit_plugin_contract_words[4]}
+    else
+      _zunit_plugin_contract_context=${(Q)_zunit_plugin_contract_words[2]}
+      _zunit_plugin_contract_property=${(Q)_zunit_plugin_contract_words[3]}
+    fi
     _zunit_plugin_contract_put "$_zunit_plugin_contract_snapshot" \
       "style:${_zunit_plugin_contract_context}:${_zunit_plugin_contract_property}" \
       "$_zunit_plugin_contract_line"
