@@ -38,14 +38,36 @@
 }
 
 @test 'release workflow publishes the zunit binary only for semantic tags' {
-  local workflow
-  workflow="$(< "$PWD/.github/workflows/release.yml")"
+  local workflow_path workflow suite_position guard_position publish_position
+  workflow_path="$PWD/.github/workflows/release.yml"
+  workflow="$(< "$workflow_path")"
 
   assert "$workflow" contains 'tags: ["v*.*.*"]'
   assert "$workflow" does_not_contain 'branches: [main]'
   assert "$workflow" contains 'contents: write'
   assert "$workflow" contains 'actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5'
+  assert "$workflow" contains 'run: ./zunit --tap tests'
   assert "$workflow" contains 'scripts/verify-release-tag.zsh "$tag" ./zunit'
   assert "$workflow" contains 'gh release create "$tag" ./zunit#zunit'
   assert "$workflow" contains 'gh release upload "$tag" ./zunit#zunit --clobber'
+
+  suite_position="$(command grep -nF 'run: ./zunit --tap tests' "$workflow_path")"
+  guard_position="$(command grep -nF 'scripts/verify-release-tag.zsh "$tag" ./zunit' "$workflow_path")"
+  publish_position="$(command grep -nF 'gh release create "$tag" ./zunit#zunit' "$workflow_path")"
+  suite_position=${suite_position%%:*}
+  guard_position=${guard_position%%:*}
+  publish_position=${publish_position%%:*}
+
+  assert "$suite_position" is_less_than "$guard_position"
+  assert "$guard_position" is_less_than "$publish_position"
+}
+
+@test 'required Zsh Lint check is available on every main change' {
+  local workflow
+  workflow="$(< "$PWD/.github/workflows/zsh-lint.yml")"
+
+  assert "$workflow" contains 'push:'
+  assert "$workflow" contains 'pull_request:'
+  assert "$workflow" contains 'branches: [main]'
+  assert "$workflow" does_not_contain 'paths:'
 }

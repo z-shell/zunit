@@ -4,16 +4,8 @@ name: Zsh Lint
 on:
   push:
     branches: [main]
-    paths:
-      - "build.zsh"
-      - "zsh-lint.json"
-      - ".github/workflows/zsh-lint.yml"
   pull_request:
     branches: [main]
-    paths:
-      - "build.zsh"
-      - "zsh-lint.json"
-      - ".github/workflows/zsh-lint.yml"
   workflow_dispatch: {}
 
 permissions:
