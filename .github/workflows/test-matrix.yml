@@ -28,14 +28,17 @@ jobs:
           cat > Dockerfile.ci <<'EOF'
           FROM alpine:3.20
           ARG ZSH_VERSION
-          RUN apk add --no-cache autoconf gcc make musl-dev ncurses-dev curl git xz yodl
+          RUN apk add --no-cache autoconf gcc make musl-dev ncurses-dev curl git xz
           RUN curl -fsSL --retry 3 --retry-delay 5 "https://sourceforge.net/projects/zsh/files/zsh/${ZSH_VERSION}/zsh-${ZSH_VERSION}.tar.xz/download" -o /tmp/zsh.tar.xz \
             && tar -C /tmp -xf /tmp/zsh.tar.xz \
             && cd "/tmp/zsh-${ZSH_VERSION}" \
-            && ./configure --prefix=/usr/local \
+            && ./configure --prefix=/usr/local --with-tcsetpgrp \
             && make \
-            && make install
+            && make install \
+            && ln -s /usr/local/bin/zsh /usr/bin/zsh \
+            && adduser -D -u 1000 zunit
           WORKDIR /opt/zunit
+          USER zunit
           EOF
           docker build --build-arg ZSH_VERSION="${{ matrix.zsh_version }}" -f Dockerfile.ci -t "zunit-ci:${{ matrix.zsh_version }}" .
       - name: Run tests
