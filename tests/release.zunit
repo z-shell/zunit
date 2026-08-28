@@ -61,3 +61,13 @@
   assert "$suite_position" is_less_than "$guard_position"
   assert "$guard_position" is_less_than "$publish_position"
 }
+
+@test 'required Zsh Lint check is available on every main change' {
+  local workflow
+  workflow="$(< "$PWD/.github/workflows/zsh-lint.yml")"
+
+  assert "$workflow" contains 'push:'
+  assert "$workflow" contains 'pull_request:'
+  assert "$workflow" contains 'branches: [main]'
+  assert "$workflow" does_not_contain 'paths:'
+}
