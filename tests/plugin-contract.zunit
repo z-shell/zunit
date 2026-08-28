@@ -1,0 +1,135 @@
+#!/usr/bin/env zunit
+
+@test 'Plugin contract snapshots are observer-stable' {
+  zunit_plugin_contract_prime
+  zunit_plugin_contract_snapshot stable_before
+  zunit_plugin_contract_snapshot stable_after
+
+  assert stable_before plugin_restored stable_after
+}
+
+@test 'Plugin load surface reports every unpermitted resource family' {
+  zunit_plugin_contract_prime
+  zunit_plugin_contract_snapshot leak_before
+  function _contract_fixture_leak() { :; }
+  typeset -g _contract_fixture_parameter=value
+  alias contract-fixture=print
+  setopt sh_word_split
+  trap 'print leaked' USR1
+  zmodload zsh/stat
+  path+=(/tmp/zunit-contract-bin)
+  fpath+=(/tmp/zunit-contract-functions)
+  precmd_functions+=(_contract_fixture_leak)
+  zstyle ':zunit-contract:test' mode on
+  zle -N zunit-contract-widget _contract_fixture_leak
+  bindkey -M emacs '^Xz' zunit-contract-widget
+  zunit_plugin_contract_snapshot leak_after
+
+  run assert leak_before plugin_load_surface leak_after
+
+  assert $state equals 1
+  assert "$output" contains 'function:_contract_fixture_leak'
+  assert "$output" contains 'parameter:_contract_fixture_parameter'
+  assert "$output" contains 'module:zsh/stat'
+  assert "$output" contains 'style::zunit-contract:test:mode'
+  assert "$output" contains 'widget:zunit-contract-widget'
+  assert "$output" contains 'path:@order'
+  assert "$output" contains 'fpath:@order'
+  assert "$output" contains 'hook:precmd'
+  assert "$output" contains 'binding:emacs'
+  assert "$output" contains 'alias:regular:contract-fixture'
+  assert "$output" contains 'option:shwordsplit'
+  assert "$output" contains 'trap:USR1'
+}
+
+@test 'Plugin load surface accepts an explicit allowlist' {
+  zunit_plugin_contract_prime
+  zunit_plugin_contract_snapshot allowed_before
+  typeset -g _contract_fixture_parameter=value
+  function _contract_fixture_action() { :; }
+  zstyle ':zunit-contract:test' mode on
+  zunit_plugin_contract_snapshot allowed_after
+
+  assert allowed_before plugin_load_surface allowed_after \
+    parameter:_contract_fixture_parameter \
+    function:_contract_fixture_action \
+    style::zunit-contract:test:mode
+}
+
+@test 'Plugin restored rejects leaked state without printing values' {
+  zunit_plugin_contract_prime
+  zunit_plugin_contract_snapshot restore_before
+  typeset -g _contract_fixture_secret='do-not-print-this-value'
+  zunit_plugin_contract_snapshot restore_after
+
+  run assert restore_before plugin_restored restore_after
+
+  assert $state equals 1
+  assert "$output" contains 'parameter:_contract_fixture_secret'
+  assert "$output" does_not_contain 'do-not-print-this-value'
+}
+
+@test 'Ownership-aware unload preserves a post-load user change' {
+  zunit_plugin_contract_prime
+  zunit_plugin_contract_snapshot owner_before
+  typeset -g _contract_fixture_owned=plugin
+  zunit_plugin_contract_snapshot owner_loaded
+  typeset -g _contract_fixture_owned=user
+  zunit_plugin_contract_snapshot owner_user
+  [[ $_contract_fixture_owned == plugin ]] && unset _contract_fixture_owned
+  zunit_plugin_contract_snapshot owner_after
+
+  assert owner_before plugin_unloaded owner_loaded owner_user owner_after
+}
+
+@test 'Ownership-aware unload rejects deletion of a user change' {
+  zunit_plugin_contract_prime
+  zunit_plugin_contract_snapshot bad_owner_before
+  typeset -g _contract_fixture_owned=plugin
+  zunit_plugin_contract_snapshot bad_owner_loaded
+  typeset -g _contract_fixture_owned=user
+  zunit_plugin_contract_snapshot bad_owner_user
+  unset _contract_fixture_owned
+  zunit_plugin_contract_snapshot bad_owner_after
+
+  run assert bad_owner_before plugin_unloaded bad_owner_loaded \
+    bad_owner_user bad_owner_after
+
+  assert $state equals 1
+  assert "$output" contains 'parameter:_contract_fixture_owned'
+}
+
+@test 'Fixture passes repeated source and exact unload' {
+  run zsh -f tests/_support/plugin-contract/scenario.zsh ordinary noninteractive
+
+  assert $state equals 0
+  assert "$output" is_empty
+}
+
+@test 'Fixture restores hostile initial state' {
+  run zsh -f tests/_support/plugin-contract/scenario.zsh hostile noninteractive
+
+  assert $state equals 0
+  assert "$output" is_empty
+}
+
+@test 'Fixture restores a partial initialization failure' {
+  run zsh -f tests/_support/plugin-contract/scenario.zsh partial noninteractive
+
+  assert $state equals 0
+  assert "$output" is_empty
+}
+
+@test 'Fixture preserves post-load user changes' {
+  run zsh -f tests/_support/plugin-contract/scenario.zsh user-change noninteractive
+
+  assert $state equals 0
+  assert "$output" is_empty
+}
+
+@test 'Fixture passes in an interactive shell' {
+  run zsh -f -i tests/_support/plugin-contract/scenario.zsh ordinary interactive
+
+  assert $state equals 0
+  assert "$output" is_empty
+}

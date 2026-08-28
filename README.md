@@ -4,6 +4,54 @@
 
 ZUnit is a powerful unit testing framework for Zsh.
 
+## Portable plugin lifecycle contract
+
+ZUnit includes observer-safe snapshots for testing the clean portable lifecycle
+defined by Zsh Plugin Standard 2. Prime the observer before the baseline, then
+name each snapshot with portable ASCII letters, digits, or underscores:
+
+```zsh
+zunit_plugin_contract_prime
+zunit_plugin_contract_snapshot before
+
+source ./example.plugin.zsh
+zunit_plugin_contract_snapshot loaded
+
+assert before plugin_load_surface loaded \
+  function:example_refresh \
+  function:example_plugin_unload \
+  parameter:_example_state \
+  style::example:config:mode
+
+source ./example.plugin.zsh
+zunit_plugin_contract_snapshot repeated
+assert loaded plugin_restored repeated
+
+example_plugin_unload
+zunit_plugin_contract_snapshot after
+assert before plugin_restored after
+```
+
+The load-surface allowlist accepts exact resource identities. Available
+families are `function`, `parameter`, `alias`, `option`, `trap`, `module`,
+`path`, `fpath`, `hook`, `widget`, `binding`, and `style`. A failure reports
+resource identities only; captured parameter values are never printed.
+
+For an ownership-aware unload test, take a snapshot after load, another after
+simulating post-load user changes, and one after unload:
+
+```zsh
+assert before plugin_unloaded loaded user_changed after
+```
+
+For each resource, this assertion restores the pre-load value when the user did
+not change the plugin-owned value, otherwise it requires unload to preserve the
+user's newer value. Use separate clean-shell tests for hostile initial state,
+partial initialization failure, and interactive behavior. The repository's
+`tests/_support/plugin-contract/scenario.zsh` demonstrates repeated source,
+partial failure, hostile state, post-load changes, and both `zsh -f` and
+`zsh -f -i` execution.
+
 ## 📖 Documentation
 
 The canonical documentation for ZUnit, including installation guides, test syntax, and CI integration, has moved to the **Z-Shell Wiki**:
