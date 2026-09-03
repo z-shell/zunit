@@ -91,7 +91,7 @@ function run() {
   #   run:1: command not found: a-non-existent-command
   # It would be skipped otherwise, i.e. "run: command ..." would be printed
   IFS=$'\n' eval "output=\$( function run {
-  ${cmd[@]/(#m)*/${${${${${(M)MATCH:#(${(j:|:)~dont_quote})}:+$MATCH}}:-\"${MATCH//(#b)([\"\`\\])/\\${match[1]}}\"}}} 2>&1 }; run )";
+  ${cmd[@]/(#m)*/${${${${${(M)MATCH:#(${(j:|:)~dont_quote})}:+$MATCH}}:-\"${MATCH//(#b)([\"\`\\$])/\\${match[1]}}\"}}} 2>&1 }; run )";
 
   # Get the process exit state
   state="$?"
@@ -163,7 +163,7 @@ function evl() {
   # It would be skipped otherwise, i.e. "eval: command ..." would be printed.
   # This is to maintain consistency with the messages printed from run().
   IFS=$'\n' builtin eval "function __eval {
-        ${___cmd[@]/(#m)*/${${${${${(M)MATCH:#(${(j:|:)~___dont_quote})}:+$MATCH}}:-\"${MATCH//(#b)([\"\`\\])/\\${match[1]}}\"}}} \
+        ${___cmd[@]/(#m)*/${${${${${(M)MATCH:#(${(j:|:)~___dont_quote})}:+$MATCH}}:-\"${MATCH//(#b)([\"\`\\$])/\\${match[1]}}\"}}} \
         }; __eval >!$___OUTFILE 2>&1";
 
   # Get the process exit state

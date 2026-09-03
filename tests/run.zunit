@@ -18,3 +18,21 @@
   assert $state equals 127
   assert $output matches 'run:[0-9]+: command not found: a-non-existent-command'
 }
+
+@test 'Command parameters expand in the command shell, not the ZUnit shell' {
+  # The command is built as text and evaluated, so every word that is not a
+  # shell operator gets requoted. If `$' is not escaped there, the ZUnit shell
+  # expands it first and the command sees an empty value. Regression test for
+  # issue #24.
+  run zsh -f -c 'typeset inner=INNER_VALUE; print -r -- "got=[${inner}]"'
+
+  assert $state equals 0
+  assert "$output" contains 'got=[INNER_VALUE]'
+}
+
+@test 'A var= assignment reaches the command shell intact' {
+  run env SOME_ISSUE_24_VAR=xyz zsh -f -c 'print -r -- "v=$SOME_ISSUE_24_VAR"'
+
+  assert $state equals 0
+  assert "$output" contains 'v=xyz'
+}
