@@ -25,6 +25,7 @@ jobs:
       actions: read
       checks: write
       contents: read
-    uses: z-shell/.github/.github/workflows/trunk.yml@62b432bd1e71895def33d16166c90bc3131eaaaf # main
+    # The shared workflow has no release tag for this revision.
+    uses: z-shell/.github/.github/workflows/trunk.yml@62b432bd1e71895def33d16166c90bc3131eaaaf # 62b432bd1e71895def33d16166c90bc3131eaaaf
     with:
       arguments: --no-progress
