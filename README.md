@@ -47,10 +47,35 @@ assert before plugin_unloaded loaded user_changed after
 For each resource, this assertion restores the pre-load value when the user did
 not change the plugin-owned value, otherwise it requires unload to preserve the
 user's newer value. Use separate clean-shell tests for hostile initial state,
-partial initialization failure, and interactive behavior. The repository's
-`tests/_support/plugin-contract/scenario.zsh` demonstrates repeated source,
-partial failure, hostile state, post-load changes, and both `zsh -f` and
-`zsh -f -i` execution.
+partial initialization failure, and interactive behavior.
+
+Repeated source does not prove that a plugin works after it was unloaded. In
+another clean shell, load, unload, and load again, then compare the second
+load with the first and observe that each restored handler, hook, widget or
+other resource still does its job; its presence or a zero status alone would
+accept an inert stub. Every restored resource with its own behavior needs its
+own check:
+
+```zsh
+zunit_plugin_contract_prime
+source ./example.plugin.zsh
+zunit_plugin_contract_snapshot loaded
+
+example_plugin_unload
+source ./example.plugin.zsh
+zunit_plugin_contract_snapshot reloaded
+assert loaded plugin_restored reloaded
+
+run example_refresh
+assert $state equals 0
+assert "$output" same_as 'refreshed'
+```
+
+The repository's `tests/_support/plugin-contract/scenario.zsh` demonstrates
+repeated source, partial failure, hostile state, post-load changes, reload
+after unload, and both `zsh -f` and `zsh -f -i` execution. Its reload
+scenario checks the fixture's one callback, which the fixture's hook and
+widget both dispatch to.
 
 ## 📖 Documentation
 

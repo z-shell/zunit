@@ -135,3 +135,38 @@
   assert $state equals 0
   assert "$output" is_empty
 }
+
+@test 'Fixture restores its surface and behavior after reload' {
+  run zsh -f tests/_support/plugin-contract/scenario.zsh reload noninteractive
+
+  assert $state equals 0
+  assert "$output" is_empty
+}
+
+@test 'Fixture reloads in an interactive shell' {
+  run zsh -f -i tests/_support/plugin-contract/scenario.zsh reload interactive
+
+  assert $state equals 0
+  assert "$output" is_empty
+}
+
+@test 'Reload rejects a plugin that unload leaves as an inert stub' {
+  run zsh -f tests/_support/plugin-contract/scenario.zsh reload noninteractive reload-broken
+
+  assert $state equals 1
+  assert "$output" contains 'function:_contract_fixture_callback'
+}
+
+@test 'Reload rejects a restored callback that no longer has its effect' {
+  run zsh -f tests/_support/plugin-contract/scenario.zsh reload noninteractive reload-stale
+
+  assert $state equals 24
+  assert "$output" is_empty
+}
+
+@test 'Scenario refuses a fixture that does not exist' {
+  run zsh -f tests/_support/plugin-contract/scenario.zsh reload noninteractive does-not-exist
+
+  assert $state equals 2
+  assert "$output" same_as 'missing fixture: does-not-exist'
+}
