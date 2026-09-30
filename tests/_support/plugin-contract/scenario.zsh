@@ -7,9 +7,11 @@ builtin setopt extended_glob typeset_silent
 0="${${(M)0:#/*}:-$PWD/$0}"
 typeset scenario=${1:-ordinary}
 typeset expected_mode=${2:-noninteractive}
+typeset fixture_name=${3:-fixture}
+[[ $fixture_name == [A-Za-z0-9_-]## ]] || { print -u2 -r -- "invalid fixture: $fixture_name"; exit 2 }
 typeset support_dir=${0:A:h}
 typeset repository_dir=${support_dir:h:h:h}
-typeset fixture=${support_dir}/fixture.plugin.zsh
+typeset fixture=${support_dir}/${fixture_name}.plugin.zsh
 
 source "${repository_dir}/src/plugin-contract.zsh" || exit
 zunit_plugin_contract_prime || exit
@@ -61,6 +63,22 @@ case $scenario in
     contract_fixture_plugin_unload || exit
     zunit_plugin_contract_snapshot after || exit
     _zunit_assert_plugin_unloaded before loaded user after
+    ;;
+  reload)
+    # Load, unload, and load again in one clean shell. The second load must
+    # restore the first load's surface, and its callback must still do its
+    # job: presence or a zero status alone would accept an inert stub. Exact
+    # unload restoration is the ordinary scenario's job, so it is not
+    # repeated here.
+    source "$fixture" || exit
+    zunit_plugin_contract_snapshot loaded || exit
+    contract_fixture_plugin_unload || exit
+    source "$fixture" || exit
+    zunit_plugin_contract_snapshot reloaded || exit
+    _zunit_assert_plugin_restored loaded reloaded || exit
+    typeset -g _contract_fixture_effect=
+    _contract_fixture_callback || exit 23
+    [[ $_contract_fixture_effect == ran ]] || exit 24
     ;;
   *)
     print -u2 -r -- "unknown scenario: $scenario"

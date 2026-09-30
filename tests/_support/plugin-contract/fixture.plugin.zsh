@@ -15,7 +15,9 @@
 
   _contract_fixture_callback() {
     builtin emulate -L zsh
-    :
+    # Observable effect, so a reload test can prove the callback still works.
+    (( ${+parameters[_contract_fixture_effect]} )) && _contract_fixture_effect=ran
+    return 0
   }
   typeset -g _contract_fixture_callback_body=${functions[_contract_fixture_callback]}
   typeset -g _contract_fixture_value=plugin
