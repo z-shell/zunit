@@ -51,8 +51,10 @@ partial initialization failure, and interactive behavior.
 
 Repeated source does not prove that a plugin works after it was unloaded. In
 another clean shell, load, unload, and load again, then compare the second
-load with the first and observe that a restored resource still does its job;
-its presence or a zero status alone would accept an inert stub:
+load with the first and observe that each restored handler, hook, widget or
+other resource still does its job; its presence or a zero status alone would
+accept an inert stub. Every restored resource with its own behavior needs its
+own check:
 
 ```zsh
 zunit_plugin_contract_prime
@@ -71,7 +73,9 @@ assert "$output" same_as 'refreshed'
 
 The repository's `tests/_support/plugin-contract/scenario.zsh` demonstrates
 repeated source, partial failure, hostile state, post-load changes, reload
-after unload, and both `zsh -f` and `zsh -f -i` execution.
+after unload, and both `zsh -f` and `zsh -f -i` execution. Its reload
+scenario checks the fixture's one callback, which the fixture's hook and
+widget both dispatch to.
 
 ## 📖 Documentation
 

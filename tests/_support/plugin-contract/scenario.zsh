@@ -12,6 +12,7 @@ typeset fixture_name=${3:-fixture}
 typeset support_dir=${0:A:h}
 typeset repository_dir=${support_dir:h:h:h}
 typeset fixture=${support_dir}/${fixture_name}.plugin.zsh
+[[ -r $fixture ]] || { print -u2 -r -- "missing fixture: $fixture_name"; exit 2 }
 
 source "${repository_dir}/src/plugin-contract.zsh" || exit
 zunit_plugin_contract_prime || exit
